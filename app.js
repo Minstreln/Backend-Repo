@@ -1,12 +1,17 @@
 const express = require('express');
 const morgan = require('morgan');
-const http = require('http');
+// const http = require('http');
 const rateLimit = require('express-rate-limit');
 const AppError = require('./utils/appError');
 const cookieParser = require('cookie-parser');
 const cors = require('cors')
 const globalErrorHandler = require('./controllers/errorHandler/errorController');
 
+// ---------------- route modules go here -------------------------------------
+
+const jobSeekerRouter = require('./routes/jobSeeker/jobSeekerRoutes');
+
+// ---------------------------------------------------------------------------
 
 const app = express();
 
@@ -31,7 +36,12 @@ if (process.env.NODE_ENV === 'development') {
     app.use(morgan('dev'));
 };
 
-// Routes should go here
+//-------------- Routes should go here ---------------------------
+
+// jobseeker route
+app.use('/api/v1/jobseeker', jobSeekerRouter);
+
+//----------------------------------------------------------------
 
 app.all('*', (req, res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server 🚨!`, 404));

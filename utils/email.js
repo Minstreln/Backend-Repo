@@ -15,7 +15,7 @@ const sendMail = async (options) => {
     },
   });
   const mailOptions = {
-    from: 'Name <mail_address>',
+    from: 'LysterPro <lysterpro@gmail.com>',
     to: options.email,
     subject: options.subject,
     html: options.message,
