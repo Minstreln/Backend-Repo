@@ -1,5 +1,6 @@
 const express = require('express');
 const jobSeekerAuthController = require('../../controllers/jobSeeker/jobSeekerAuthController');
+const jobSeekerController = require('../../controllers/jobSeeker/jobSeekerController');
 
 const Router = express.Router();
 
@@ -20,6 +21,40 @@ Router.patch('/update-password',
     jobSeekerAuthController.protect,
     jobSeekerAuthController.restrictTo('job seeker'),
     jobSeekerAuthController.jobSeekerUpdatePassword
+);
+
+// jobseeker update personal detail endpoint
+Router.post('/personal-detail',
+    jobSeekerAuthController.protect, 
+    jobSeekerAuthController.restrictTo('job seeker'), 
+    jobSeekerController.uploadJobseekerPhoto,
+    jobSeekerController.resizeJobseekerPhoto,
+    jobSeekerController.jobseekerPersonalDetail
+);
+
+// jobseeker update academic detail endpoint
+Router.post('/academic-detail',
+    jobSeekerAuthController.protect, 
+    jobSeekerAuthController.restrictTo('job seeker'), 
+    jobSeekerController.uploadJobseekerPhoto,
+    jobSeekerController.resizeJobseekerPhoto,
+    jobSeekerController.jobseekerAcademicDetail
+);
+
+// jobseeker update academic detail endpoint
+Router.post('/experience',
+    jobSeekerAuthController.protect, 
+    jobSeekerAuthController.restrictTo('job seeker'),
+    jobSeekerController.jobseekerExperience
+);
+
+// jobseeker ipload resume endpoint
+Router.post('/resume',
+    jobSeekerAuthController.protect, 
+    jobSeekerAuthController.restrictTo('job seeker'),
+    jobSeekerController.uploadJobseekerPhoto,
+    jobSeekerController.resizeJobseekerPhoto,
+    jobSeekerController.jobseekerResume
 );
   
 //////////////////////////////// GENERIC ROUTES ////////////////////////////////////////
