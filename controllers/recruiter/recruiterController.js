@@ -5,10 +5,9 @@ const path = require('path');
 // const crypto = require('crypto');
 // const sendMail = require('../../utils/email');
 const AppError = require('../../utils/appError');
-const PersonalDetail = require('../../models/jobSeeker/personalDetailModel');
-const AcademicDetail = require('../../models/jobSeeker/academicDetailModel');
-const Experience = require('../../models/jobSeeker/experienceModel');
-const Resume = require('../../models/jobSeeker/resumeModel');
+const RecruiterPersonalDetail = require('../../models/recruiter/personalDetailModel');
+const CompanyDetail = require('../../models/recruiter/companyDetailModel');
+const RecruiterExperience = require('../../models/recruiter/experienceModel');
 const catchAsync = require('../../utils/catchAsync');
 // const factory = require('../handler/handlerFactory');
 
@@ -17,7 +16,7 @@ const multerStorage = multer.memoryStorage();
 const multerFilter = (req, file, cb) => {
     if (
       file.mimetype.startsWith('image') ||
-      (file.mimetype === 'application/pdf' && ['highSchCertificate', 'degreeCertificate', 'resume'].includes(file.fieldname))
+      (file.mimetype === 'application/pdf' && ['employmentProof'].includes(file.fieldname))
     ) {
       cb(null, true);
     } else {
@@ -30,12 +29,10 @@ const upload = multer({
   fileFilter: multerFilter,
 });
 
-exports.uploadJobseekerPhoto = catchAsync(async (req, res, next) => {
+exports.uploadRecruiterPhoto = catchAsync(async (req, res, next) => {
     upload.fields([
         { name: 'profileImage', maxCount: 1 },
-        { name: 'highSchCertificate', maxCount: 1 },
-        { name: 'degreeCertificate', maxCount: 1 },
-        { name: 'resume', maxCount: 1 }
+        { name: 'employmentProof', maxCount: 1 },
     ])(req, res, (err) => {
         if (err) {
             if (err instanceof multer.MulterError) {
@@ -49,7 +46,7 @@ exports.uploadJobseekerPhoto = catchAsync(async (req, res, next) => {
     });
 });
   
-exports.resizeJobseekerPhoto = (req, res, next) => {
+exports.resizeRecruiterPhoto = (req, res, next) => {
     if (!req.files) {
         return next();
     }
@@ -59,13 +56,13 @@ exports.resizeJobseekerPhoto = (req, res, next) => {
             const isPdf = file.mimetype === 'application/pdf';
 
             if (!isPdf) {
-                file.filename = `Jobseeker-${req.user.id}-${Date.now()}.jpeg`;
+                file.filename = `Recruiter-${req.user.id}-${Date.now()}.jpeg`;
 
                 sharp(file.buffer)
                     .resize(500, 500)
                     .toFormat('jpeg')
                     .jpeg({ quality: 90 })
-                    .toFile(`public/img/jobseeker/image/${file.filename}`)
+                    .toFile(`public/img/recruiter/image/${file.filename}`)
                     .then(() => {
                     })
                     .catch((err) => {
@@ -76,7 +73,7 @@ exports.resizeJobseekerPhoto = (req, res, next) => {
 
                 file.filename = `${originalName}-${req.user.id}.${fileExtension}`;
 
-                fs.writeFile(`public/img/jobseeker/pdf/${file.filename}`, file.buffer, (err) => {
+                fs.writeFile(`public/img/recruiter/pdf/${file.filename}`, file.buffer, (err) => {
                     if (err) {
                     } else {
                     }
@@ -96,15 +93,14 @@ const filterObj = (obj, ...allowedFields) => {
   return newObj;
 };
 
-// update jobseeker personal details after sign up
-exports.jobseekerPersonalDetail = catchAsync(async (req, res, next) => {
+// update recruiter personal details after sign up
+exports.recruiterPersonalDetail = catchAsync(async (req, res, next) => {
     const filteredBody = filterObj(
         req.body,
         'profileImage',
         'middleName',
         'location',
         'linkedAccount',
-        'aboutMe',
     );
     
     if (req.files && req.files.profileImage) {
@@ -113,7 +109,7 @@ exports.jobseekerPersonalDetail = catchAsync(async (req, res, next) => {
         return next(new AppError('Please upload a profile picture', 400));
     }
 
-    const newJobseekerPersonalDetail = await PersonalDetail.create({
+    const newRecruiterPersonalDetail = await RecruiterPersonalDetail.create({
         ...filteredBody,
         user: req.user.id
     });
@@ -121,37 +117,31 @@ exports.jobseekerPersonalDetail = catchAsync(async (req, res, next) => {
     res.status(200).json({
         status: 'success',
         data: {
-            user: newJobseekerPersonalDetail,
+            user: newRecruiterPersonalDetail,
         },
     });
 });
 
 
-// jobseeker academics details
-exports.jobseekerAcademicDetail = catchAsync(async (req, res, next) => {
+// recruiter company details
+exports.recruiterCompanyDetail = catchAsync(async (req, res, next) => {
     const filteredBody = filterObj(
         req.body,
-        'institutionName',
+        'companyName',
         'location',
-        'yearOfCompletion',
-        'highSchCertificate',
-        'degreeCertificate',
-        'course',
+        'yearOfJoining',
+        'employmentProof',
+        'companyType',
     );
-    
-    if (req.files) {
-        if (req.files.highSchCertificate) {
-            filteredBody.highSchCertificate = req.files.highSchCertificate[0].filename;
-        }
-        if (req.files.degreeCertificate) {
-            filteredBody.degreeCertificate = req.files.degreeCertificate[0].filename;
-        }
-         else {
-            return next(new AppError('Please upload certificate', 400));
-        }
+
+    if (req.files.employmentProof) {
+        filteredBody.employmentProof = req.files.employmentProof[0].filename;
+    }
+        else {
+        return next(new AppError('Please upload a proof of your employment at the company', 400));
     }
 
-    const newJobseekerAcademicDetail = await AcademicDetail.create({
+    const newRecruiterCompanyDetail = await CompanyDetail.create({
         ...filteredBody,
         user: req.user.id
     });
@@ -159,16 +149,17 @@ exports.jobseekerAcademicDetail = catchAsync(async (req, res, next) => {
     res.status(200).json({
         status: 'success',
         data: {
-            Academics: newJobseekerAcademicDetail,
+            CompanyDetails: newRecruiterCompanyDetail,
         },
     });
 });
 
-// jobseeker work experiene logic
-exports.jobseekerExperience = catchAsync(async (req, res, next) => {
+
+// recruiter work experiene logic
+exports.recruiterExperience = catchAsync(async (req, res, next) => {
     const userId = req.user.id;
 
-    const newJobseekerExperience = await Experience.create({
+    const newRecruiterExperience = await RecruiterExperience.create({
         role: req.body.role,
         typeOfRole: req.body.typeOfRole,
         company: req.body.company,
@@ -182,34 +173,7 @@ exports.jobseekerExperience = catchAsync(async (req, res, next) => {
     res.status(200).json({
         status: 'success',
         data: {
-            Experience: newJobseekerExperience,
-        },
-    });
-});
-
-// jobseeker upload resume
-exports.jobseekerResume = catchAsync(async (req, res, next) => {
-    const filteredBody = filterObj(
-        req.body,
-        'resume',
-    );
-    
-    if (req.files.resume) {
-        filteredBody.resume = req.files.resume[0].filename;
-    }
-    else {
-        return next(new AppError('Please upload your resume', 400));
-    }
-
-    const newJobseekerResume = await Resume.create({
-        ...filteredBody,
-        user: req.user.id
-    });
-
-    res.status(200).json({
-        status: 'success',
-        data: {
-            resumeDetails: newJobseekerResume,
+            Experience: newRecruiterExperience,
         },
     });
 });

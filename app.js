@@ -10,6 +10,8 @@ const globalErrorHandler = require('./controllers/errorHandler/errorController')
 // ---------------- route modules go here -------------------------------------
 
 const jobSeekerRouter = require('./routes/jobSeeker/jobSeekerRoutes');
+const recruiterRouter = require('./routes/recruiter/recruiterRoutes');
+const adminRouter = require('./routes/admin/adminRoutes');
 
 // ---------------------------------------------------------------------------
 
@@ -40,6 +42,10 @@ if (process.env.NODE_ENV === 'development') {
 
 // jobseeker route
 app.use('/api/v1/jobseeker', jobSeekerRouter);
+// recruiter route
+app.use('/api/v1/recruiter', recruiterRouter);
+//admin routes
+app.use('/api/v1/admin', adminRouter);
 
 //----------------------------------------------------------------
 

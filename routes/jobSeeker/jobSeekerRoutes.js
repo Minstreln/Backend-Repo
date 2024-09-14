@@ -41,14 +41,14 @@ Router.post('/academic-detail',
     jobSeekerController.jobseekerAcademicDetail
 );
 
-// jobseeker update academic detail endpoint
+// jobseeker update experience detail endpoint
 Router.post('/experience',
     jobSeekerAuthController.protect, 
     jobSeekerAuthController.restrictTo('job seeker'),
     jobSeekerController.jobseekerExperience
 );
 
-// jobseeker ipload resume endpoint
+// jobseeker upload resume endpoint
 Router.post('/resume',
     jobSeekerAuthController.protect, 
     jobSeekerAuthController.restrictTo('job seeker'),
