@@ -12,6 +12,8 @@ const globalErrorHandler = require('./controllers/errorHandler/errorController')
 const jobSeekerRouter = require('./routes/jobSeeker/jobSeekerRoutes');
 const recruiterRouter = require('./routes/recruiter/recruiterRoutes');
 const adminRouter = require('./routes/admin/adminRoutes');
+const categoryRouter = require('./routes/category/categoryRoutes');
+const jobListingRouter = require('./routes/jobListing/jobListingRoutes');
 
 // ---------------------------------------------------------------------------
 
@@ -44,8 +46,12 @@ if (process.env.NODE_ENV === 'development') {
 app.use('/api/v1/jobseeker', jobSeekerRouter);
 // recruiter route
 app.use('/api/v1/recruiter', recruiterRouter);
-//admin routes
+// admin routes
 app.use('/api/v1/admin', adminRouter);
+// category routes
+app.use('/api/v1/category', categoryRouter);
+// Job listing routes
+app.use('/api/v1/jobListing', jobListingRouter);
 
 //----------------------------------------------------------------
 
