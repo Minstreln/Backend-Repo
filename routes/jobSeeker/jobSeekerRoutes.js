@@ -1,5 +1,7 @@
 const express = require('express');
 const jobSeekerAuthController = require('../../controllers/jobSeeker/jobSeekerAuthController');
+const jobseekerFbAuthController = require('../../controllers/jobSeeker/oauth/jobSeekerFbAuthController');
+const jobseekerGoogleAuthController = require('../../controllers/jobSeeker/oauth/jobSeekerGoogleAuthController');
 const jobSeekerController = require('../../controllers/jobSeeker/jobSeekerController');
 
 const Router = express.Router();
@@ -12,6 +14,26 @@ Router.post('/signin', jobSeekerAuthController.jobSeekerSignin);
 
 // jobseeker logout endpoint
 Router.get('/logout', jobSeekerAuthController.jobSeekerLogout);
+
+
+
+/////////////////////////////// GOOGLE OAUTH ENDPOINTS /////////////////////////////////
+
+// Google initialisation endpoint
+Router.get('/auth/google', jobseekerGoogleAuthController.jobseekerGoogleAuthInit);
+
+// Google callback endpoint
+Router.get('/auth/google/callback', jobseekerGoogleAuthController.jobseekerGoogleAuthCallback);
+
+/////////////////////////////// FACEBOOK OAUTH ENDPOINTS /////////////////////////////////
+
+// Facebook initialisation endpoint
+Router.get('/auth/facebook', jobseekerFbAuthController.jobseekerFbAuthInit);
+
+// Facebook callback endpoint
+Router.get('/auth/facebook/callback', jobseekerFbAuthController.jobseekerFbAuthCallback);
+
+
 
 // jobseeker forgot password endpoint
 Router.post('/forgot-password', jobSeekerAuthController.jobSeekerForgotPassword);

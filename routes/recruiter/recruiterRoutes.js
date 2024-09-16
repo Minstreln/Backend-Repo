@@ -1,5 +1,7 @@
 const express = require('express');
 const recruiterAuthController = require('../../controllers/recruiter/recruiterAuthController');
+const recruiterFbAuthController = require('../../controllers/recruiter/oauth/recruiterFbAuthController');
+const recruiterGoogleAuthCallback = require('../../controllers/recruiter/oauth/recruiterGoogleAuthController');
 const recruiterController = require('../../controllers/recruiter/recruiterController');
 
 const Router = express.Router();
@@ -12,6 +14,27 @@ Router.post('/signin', recruiterAuthController.recruiterSignin);
 
 // recruiter logout endpoint
 Router.get('/logout', recruiterAuthController.recruiterLogout);
+
+
+
+/////////////////////////////// GOOGLE OAUTH ENDPOINTS /////////////////////////////////
+
+// Google initialisation endpoint
+Router.get('/auth/google', recruiterGoogleAuthCallback.recruiterGoogleAuthInit);
+
+// Google callback endpoint
+Router.get('/auth/google/callback', recruiterGoogleAuthCallback.recruiterGoogleAuthCallback);
+
+/////////////////////////////// FACEBOOK OAUTH ENDPOINTS /////////////////////////////////
+
+// Facebook initialisation endpoint
+Router.get('/auth/facebook', recruiterFbAuthController.recruiterFbAuthInit);
+
+// Facebook callback endpoint
+Router.get('/auth/facebook/callback', recruiterFbAuthController.recruiterFbAuthCallback);
+
+
+
 
 // recruiter forgot password endpoint
 Router.post('/forgot-password', recruiterAuthController.recruiterForgotPassword);
