@@ -7,7 +7,7 @@ const Router = express.Router();
 // Enpoint to add Job listing
 Router.post('/add-joblisting', 
     adminAuthController.protect,
-    adminAuthController.restrictTo('admin', 'Recruiter'),
+    adminAuthController.restrictTo('recruiter'),
     jobListingController.addJobListing
 );
 
@@ -26,12 +26,12 @@ Router.route('/:id')
     )
   .patch(
     adminAuthController.protect,
-    adminAuthController.restrictTo('admin', 'Recruiter'),
+    adminAuthController.restrictTo('recruiter'),
     jobListingController.updateJobListing
   )
   .delete(
     adminAuthController.protect,
-    adminAuthController.restrictTo('admin', 'Recruiter'),
+    adminAuthController.restrictTo('recruiter'),
     jobListingController.deleteJobListing
   );
 

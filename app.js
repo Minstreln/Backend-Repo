@@ -14,6 +14,7 @@ const recruiterRouter = require('./routes/recruiter/recruiterRoutes');
 const adminRouter = require('./routes/admin/adminRoutes');
 const categoryRouter = require('./routes/category/categoryRoutes');
 const jobListingRouter = require('./routes/jobListing/jobListingRoutes');
+const jobApplicationRouter = require('./routes/jobApplication/jobApplicationRoutes');
 
 // ---------------------------------------------------------------------------
 
@@ -52,6 +53,8 @@ app.use('/api/v1/admin', adminRouter);
 app.use('/api/v1/category', categoryRouter);
 // Job listing routes
 app.use('/api/v1/jobListing', jobListingRouter);
+// Job application routes
+app.use('/api/v1/apply', jobApplicationRouter);
 
 //----------------------------------------------------------------
 

@@ -285,7 +285,7 @@ exports.deleteRecruiter = factory.deleteOne(Recruiter);
 
 // Function to unsuspend users automatically
 const unsuspendUsers = async () => {
-    console.log(`Running unsuspend users task at ${new Date().toLocaleTimeString()}...`);
+    // console.log(`Running unsuspend users task at ${new Date().toLocaleTimeString()}...`);
   
     try {
       const unsuspendedJobseekers = await JobSeeker.updateMany(
@@ -301,7 +301,7 @@ const unsuspendUsers = async () => {
         }
     );
   
-    console.log(`Unsuspended ${unsuspendedJobseekers.nModified} jobseekers at ${new Date().toLocaleTimeString()}.`);
+    // console.log(`Unsuspended ${unsuspendedJobseekers.nModified} jobseekers at ${new Date().toLocaleTimeString()}.`);
 
     const unsuspendedRecruiters = await Recruiter.updateMany(
     { 
@@ -316,7 +316,7 @@ const unsuspendUsers = async () => {
     }
     );
 
-    console.log(`Unsuspended ${unsuspendedRecruiters.nModified} recruiters at ${new Date().toLocaleTimeString()}.`);
+    // console.log(`Unsuspended ${unsuspendedRecruiters.nModified} recruiters at ${new Date().toLocaleTimeString()}.`);
       
     } catch (error) {
       console.error('Error occurred while unsuspending users:', error);

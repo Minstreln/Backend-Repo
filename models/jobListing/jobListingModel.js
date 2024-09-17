@@ -63,6 +63,11 @@ const joblistingSchema = new mongoose.Schema({
         type: Number,
         required: [true, 'Please specify the minimum years of experience required'],
     },
+    recruiterId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Recruiter',
+        required: [true, 'Could not create job listing at this time']
+    }
     }, {
     timestamps: true, 
 });
