@@ -14,10 +14,31 @@ Router.post('/add-joblisting',
 // Enpoint to get all Job listings
 Router.get('/get-all-joblistings', jobListingController.getAllJobListing);
 
+// Endpoint for recruiters to get jobs related (posted) by them
+Router.get('/my-joblisting', 
+  adminAuthController.protect,
+  adminAuthController.restrictTo('recruiter', 'admin'),
+  jobListingController.getRecruiterJobListings
+);
+
 //////////////////////////////// GENERIC ROUTES ////////////////////////////////////////
 
 // endpoint to get jobs by category
 Router.get('/category/:categoryId', jobListingController.getJobsByCategory);
+
+// Deactivate job listing by recruiter endpoint
+Router.patch('/deactivate/:jobId', 
+  adminAuthController.protect,
+  adminAuthController.restrictTo('recruiter', 'admin'),
+  jobListingController.deactivateJobListing
+);
+
+// update job listing status by recruiter endpoint
+Router.patch('/status/:jobId', 
+  adminAuthController.protect,
+  adminAuthController.restrictTo('recruiter', 'admin'),
+  jobListingController.updateJobStatus
+);
 
 //get single, update and delete Job listing endpoint
 Router.route('/:id')

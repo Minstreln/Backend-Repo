@@ -39,16 +39,14 @@ const recruiterSchema = mongoose.Schema({
         type: String,
         required: [true, 'Please enter a password!'],
         trim: true,
-        minlength: [6, 'Your password cannot be less than 6 digits!'],
-        maxlength: [6, 'Your password can not be greater than 6 digits!'],
+        minlength: [8, 'Your password cannot be less than 8 characters!'],
         select: false,
     },
     passwordConfirm: {
         type: String,
         required: [true, 'Please confirm your password!'],
         trim: true,
-        minlength: [6, 'Your password cannot be less than 6 digits!'],
-        maxlength: [6, 'Your password can not be greater than 6 digits!'],
+        minlength: [8, 'Your password cannot be less than 8 characters!'],
         validate: {
             validator: function (el) {
             return el === this.password;
