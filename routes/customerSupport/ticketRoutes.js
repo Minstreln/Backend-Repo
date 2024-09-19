@@ -2,19 +2,23 @@ const express = require('express');
 const router = express.Router();
 const ticketController = require('../../controllers/customerSupport/ticketController');
 const authController = require('../../controllers/jobSeeker/jobSeekerAuthController');
+const recruiterAuthControler= require('../../controllers/recruiter/recruiterAuthController')
 
-router.use(authController.protect)
+// Protect all routes to ensure user is authenticated
+router.use(authController.protect);
 
-// Create a new ticket
+// Routes for job seekers (authenticated users)
 router.post('/', ticketController.createTicket);
-
-// Get all tickets for a user
 router.get('/', ticketController.getUserTickets);
-
-// Get a specific ticket by ID
 router.get('/:id', ticketController.getTicket);
+router.patch('/:id', ticketController.updateTicket);
+router.delete('/:id', ticketController.deleteTicket);
 
-// Update ticket status
-router.put('/:id', ticketController.updateTicketStatus);
+// Restrict `updateTicketStatus` to recruiters and admins only
+router.patch(
+  '/updateTicketStatus/:id',
+  recruiterAuthControler.restrictTo('recruiter', 'admin'), 
+  ticketController.updateTicketStatus
+);
 
 module.exports = router;

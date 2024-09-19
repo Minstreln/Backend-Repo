@@ -11,7 +11,7 @@ router.route('/applications').get(applicationController.getApplications);
 router.route('/:id').get(applicationController.getApplicationById);
 
 // Get all applications for a specific job listing
-router.route('/job/:jobListingId').get(applicationController.getApplicationById);
+router.route('/job/:jobListingId').get(applicationController.getApplicationsByJob);
 
 // Update the status of an application
 router.route('/update/:id').patch(applicationController.updateApplicationStatus);

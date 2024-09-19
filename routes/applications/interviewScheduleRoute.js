@@ -3,7 +3,6 @@ const applicationController = require('../../controllers/applicationManagement/i
 const router = express.Router();
 const authController = require('../../controllers/recruiter/recruiterAuthController');
 
-// Protect routes
 router.use(authController.protect);
 
 // Schedule an interview for a specific application

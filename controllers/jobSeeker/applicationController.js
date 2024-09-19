@@ -3,11 +3,11 @@ const AppError = require('../../utils/appError');
 const catchAsync = require('../../utils/catchAsync');
 const { body, validationResult } = require('express-validator');
 
-// Create a new application
+// Create a new job application
 exports.createApplication = catchAsync(async (req, res, next) => {
     await body('jobListing').notEmpty().withMessage('Job listing is required').run(req);
     await body('coverLetter').notEmpty().withMessage('Cover letter is required').run(req);
-    
+
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return next(new AppError(errors.array().map(err => err.msg).join(', '), 400));
@@ -25,10 +25,15 @@ exports.createApplication = catchAsync(async (req, res, next) => {
         resume
     });
 
+    // Populate the jobListing field to get the full data
+    const populatedApplication = await applicationModel.findById(newApplication._id)
+        .populate('jobListing')  // Make sure 'jobListing' is the field name in your model
+        .populate('jobSeeker');
+
     res.status(201).json({
         status: 'success',
         data: {
-            application: newApplication
+            application: populatedApplication
         }
     });
 });
@@ -36,7 +41,7 @@ exports.createApplication = catchAsync(async (req, res, next) => {
 // Get all applications
 exports.getAllApplications = catchAsync(async (req, res, next) => {
     const applications = await applicationModel.find()
-        .populate('job')
+        .populate('jobListing')  // Make sure 'jobListing' is the field name in your model
         .populate('jobSeeker');
 
     res.status(200).json({
@@ -47,6 +52,7 @@ exports.getAllApplications = catchAsync(async (req, res, next) => {
         }
     });
 });
+
 
 // Get a single application by ID
 exports.getApplicationById = catchAsync(async (req, res, next) => {

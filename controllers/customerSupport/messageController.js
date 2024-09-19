@@ -19,14 +19,20 @@ exports.createMessage = catchAsync(async (req, res, next) => {
   // Use logged-in recruiter's ID
   const sender = req.user._id;
 
-  // Create the message
+  if (req.user.role !== 'recruiter' && req.user.role !== 'admin') {
+    return next(new AppError('You do not have permission to update the ticket status', 403));
+  }
+
   const message = await Message.create({ ticket, sender, content });
+
+  // Update ticket status to 'in progress' after creating the message
+  ticketExists.status = 'in-progress';  
+  await ticketExists.save();
 
   // Retrieve the job seeker associated with the ticket
   const jobSeeker = await JobSeeker.findById(ticketExists.user);
 
   if (jobSeeker) {
-    // Send email notification
     await sendMail({
       to: jobSeeker.email,
       subject: 'New Message on Your Ticket',
@@ -46,6 +52,7 @@ exports.createMessage = catchAsync(async (req, res, next) => {
     }
   });
 });
+
 
 // Get all messages for a specific ticket
 exports.getMessages = catchAsync(async (req, res, next) => {

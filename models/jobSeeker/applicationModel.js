@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const jobApplicationSchema = new mongoose.Schema({
+const JobApplicationSchema = new mongoose.Schema({
     jobListing: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'JobListing',
@@ -32,11 +32,33 @@ const jobApplicationSchema = new mongoose.Schema({
         type: String,
         enum: ['Applied', 'Reviewed', 'Interviewed', 'Hired', 'Rejected'],
         default: 'Applied',
-    }
+    },
+    interview: {
+        scheduled: {
+            type: Boolean,
+            default: false,
+        },
+        date: Date,
+        time: String,
+        location: String,
+        virtualLink: String,
+    },
+    statusHistory: [
+        {
+            status: {
+                type: String,
+                enum: ['Applied', 'Reviewed', 'Interviewed', 'Hired', 'Rejected'],
+            },
+            updatedAt: {
+                type: Date,
+                default: Date.now,
+            },
+        },
+    ],
 }, {
     timestamps: true, 
 });
 
-const JobApplication = mongoose.model('JobApplication', jobApplicationSchema);
+const JobApplication = mongoose.model('Application', JobApplicationSchema);
 
 module.exports = JobApplication;

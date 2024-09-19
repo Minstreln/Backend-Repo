@@ -6,6 +6,11 @@ const ticketSchema = mongoose.Schema({
     ref: 'JobSeeker',
     required: true
   },
+  job: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'JobListing',
+    required: true
+  },
   subject: {
     type: String,
     required: true

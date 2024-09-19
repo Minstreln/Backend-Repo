@@ -59,6 +59,11 @@ const joblistingSchema = new mongoose.Schema({
         type: String,
         required: [true, 'Please enter the skills and qualifications for this role']
     },
+    recruiter: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Recruiter',  
+        required: true,
+    },
     yearsOfExperience: {
         type: Number,
         required: [true, 'Please specify the minimum years of experience required'],

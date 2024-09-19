@@ -1,57 +1,76 @@
-const mongoose = require('mongoose');
-const Application = require('../../models/applicationManagements/applicationManagementModels');
-const applicationModel = require('../../models/jobSeeker/applicationModel');
+
+const Application = require('../../models/jobSeeker/applicationModel');
 const APIFeatures = require('../../utils/apiFeatures');
 const catchAsync = require('../../utils/catchAsync');
 const AppError = require('../../utils/appError');
 const sendMail = require('../../utils/email');
 
-// Get all applications
-const getApplications = async (req, res) => {
+const getApplications = catchAsync(async (req, res, next) => {
   try {
-    const applications = await Application.find()
-      .populate('job') 
-      .populate('jobSeeker');
+  
+    // console.log('Logged-in user ID:', req.user.id);
+
+    const allApplications = await Application.find()
+      .populate('jobListing')  
+      .populate('jobSeeker');  
+
+    // console.log('Fetched applications:', JSON.stringify(allApplications, null, 2));
+
+    const filteredApplications = allApplications.filter(app => {
+      const recruiterId = app.jobListing?.recruiter; 
+      return recruiterId && recruiterId.toString() === req.user.id.toString();
+    });
+
+    // console.log('Filtered applications:', JSON.stringify(filteredApplications, null, 2));
 
     res.status(200).json({
       status: 'success',
-      results: applications.length,
+      results: filteredApplications.length,
       data: {
-        applications
+        applications: filteredApplications
       }
     });
   } catch (error) {
+    console.error('Error fetching applications:', error);
     res.status(400).json({
       status: 'fail',
       message: error.message
     });
   }
-};
+});
 
 
 // Get a single application by ID
-const getApplicationById = async (req, res) => {
+const getApplicationById = catchAsync(async (req, res, next) => {
   try {
-      const application = await Application.findById(req.params.id)
-          .populate('job') 
-          .populate('applicant');
+    const application = await Application.findById(req.params.id)
+      .populate('jobListing')
+      .populate('jobSeeker');
+      
+    if (!application) {
+      return res.status(404).json({ message: 'Application not found' });
+    }
 
-      if (!application) {
-          return res.status(404).json({ message: 'Application not found' });
-      }
+    // Ensure the application is related to the recruiter
+    const recruiterId = application.jobListing?.recruiter;
+    if (!recruiterId || recruiterId.toString() !== req.user.id.toString()) {
+      return next(new AppError('You are not authorized to access this application', 403));
+    }
 
-      res.status(200).json({ application });
+    res.status(200).json({ application });
   } catch (err) {
-      res.status(500).json({ message: 'Server error', error: err });
+    res.status(500).json({ message: 'Server error', error: err });
   }
-};
+});
+
 
 // Get all applications for a specific job
 const getApplicationsByJob = catchAsync(async (req, res, next) => {
   const { jobListingId } = req.params;
 
+  // Fetch applications related to the specified job listing ID
   const applications = await Application.find({ jobListing: jobListingId })
-    .populate('job')
+    .populate('jobListing')
     .populate('jobSeeker');
 
   if (!applications || applications.length === 0) {
@@ -67,46 +86,51 @@ const getApplicationsByJob = catchAsync(async (req, res, next) => {
   });
 });
 
+
+
 // Update the status of an application
 const updateApplicationStatus = catchAsync(async (req, res, next) => {
   const { status } = req.body;
   const { id } = req.params;
 
-  if (!['accepted', 'interviewed', 'rejected', 'pending'].includes(status)) {
+  const validStatuses = ['Applied', 'Reviewed', 'Interviewed', 'Hired', 'Rejected'];
+
+  // Check if the provided status is valid
+  if (!validStatuses.includes(status)) {
     return next(new AppError('Invalid status value', 400));
   }
 
   // Find and populate the application
-  const application = await Application.findById(id).populate('applicant');
+  const application = await Application.findById(id).populate('jobSeeker');
 
   if (!application) {
     return next(new AppError('No application found with that ID', 404));
   }
 
-  // Check if the applicant's details are populated
-  if (!application.applicant || !application.applicant.email) {
-    console.error('Job Seeker Details:', application.applicant);
+  if (!application.jobSeeker || !application.jobSeeker.email) {
+    console.error('Job Seeker Details:', application.jobSeeker);
     return next(new AppError('Job seeker email not found', 500));
   }
 
+  // Update the application status
   application.status = status;
   await application.save();
 
   // Send email to job seeker
   try {
     await sendMail({
-      to: application.applicant.email,
+      to: application.jobSeeker.email,
       subject: 'Application Status Update',
-      html: `<p>Dear ${application.applicant.firstName} ${application.applicant.lastName},</p>
+      html: `<p>Dear ${application.jobSeeker.firstName} ${application.jobSeeker.lastName},</p>
              <p>Your application status has been updated to "<strong>${status}</strong>".</p>
              <p>Best regards</p>`,
     });
-    
   } catch (emailError) {
     console.error(`Failed to send email: ${emailError.message}`);
     return next(new AppError('Failed to send email to job seeker', 500));
   }
 
+  // Send response to the client
   res.status(200).json({
     status: 'success',
     data: {

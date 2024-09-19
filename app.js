@@ -15,11 +15,11 @@ const adminRouter = require('./routes/admin/adminRoutes');
 const categoryRouter = require('./routes/category/categoryRoutes');
 const jobListingRouter = require('./routes/jobListing/jobListingRoutes');
 
-const applicationManagementRouter = require('./routes/applications/applicationRoutes');
+const applicationManagementRouter =  require('./routes/applications/applicationManagementRoutes');
 const ticketRouter = require('./routes/customerSupport/ticketRoutes');
 const messageRouter = require('./routes/customerSupport/messageRoute');
 const inteviewSheduleRouter = require('./routes/applications/interviewScheduleRoute');
-const applicationRouter = require('./routes/applications/applicationRoutes');
+const applicationRouter = require('./routes/jobSeeker/applicationRoute');
 
 
 // ---------------------------------------------------------------------------
