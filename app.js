@@ -15,6 +15,13 @@ const adminRouter = require('./routes/admin/adminRoutes');
 const categoryRouter = require('./routes/category/categoryRoutes');
 const jobListingRouter = require('./routes/jobListing/jobListingRoutes');
 
+const applicationManagementRouter =  require('./routes/applications/applicationManagementRoutes');
+const ticketRouter = require('./routes/customerSupport/ticketRoutes');
+const messageRouter = require('./routes/customerSupport/messageRoute');
+const inteviewSheduleRouter = require('./routes/applications/interviewScheduleRoute');
+const applicationRouter = require('./routes/jobSeeker/applicationRoute');
+
+
 // ---------------------------------------------------------------------------
 
 const app = express();
@@ -52,6 +59,16 @@ app.use('/api/v1/admin', adminRouter);
 app.use('/api/v1/category', categoryRouter);
 // Job listing routes
 app.use('/api/v1/jobListing', jobListingRouter);
+
+app.use('/api/v1/applications-management', applicationManagementRouter);
+
+app.use('/api/v1/applications', applicationRouter);
+
+app.use('/api/v1/tickets', ticketRouter);
+
+app.use('/api/v1/messages', messageRouter);
+
+app.use('/api/v1/interview-schedule', inteviewSheduleRouter);
 
 //----------------------------------------------------------------
 
