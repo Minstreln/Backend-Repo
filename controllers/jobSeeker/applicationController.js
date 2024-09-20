@@ -2,6 +2,7 @@ const applicationModel = require('../../models/jobSeeker/applicationModel');
 const AppError = require('../../utils/appError');
 const catchAsync = require('../../utils/catchAsync');
 const { body, validationResult } = require('express-validator');
+const { notifyRecruiter } = require('../../utils/websocket'); // Import WebSocket notification
 
 // Create a new job application
 exports.createApplication = catchAsync(async (req, res, next) => {
@@ -30,6 +31,16 @@ exports.createApplication = catchAsync(async (req, res, next) => {
         .populate('jobListing')  // Make sure 'jobListing' is the field name in your model
         .populate('jobSeeker');
 
+    // Notify recruiter via WebSocket
+    notifyRecruiter(
+        JSON.stringify({
+            message: `New job application received from ${req.user.email}`,
+            jobListing: populatedApplication.jobListing.title,
+            applicant: req.user.name,
+            email: req.user.email,
+        })
+    );
+
     res.status(201).json({
         status: 'success',
         data: {
@@ -37,6 +48,7 @@ exports.createApplication = catchAsync(async (req, res, next) => {
         }
     });
 });
+
 
 // Get all applications
 exports.getAllApplications = catchAsync(async (req, res, next) => {
