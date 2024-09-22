@@ -10,7 +10,7 @@ const Router = express.Router();
 Router.post('/signup', jobSeekerAuthController.jobSeekerSignup);
 
 // jobseeker signin endpoint
-Router.post('/signin', jobSeekerAuthController.jobSeekerSignin);
+// Router.post('/signin', jobSeekerAuthController.jobSeekerSignin);
 
 // jobseeker logout endpoint
 Router.get('/logout', jobSeekerAuthController.jobSeekerLogout);

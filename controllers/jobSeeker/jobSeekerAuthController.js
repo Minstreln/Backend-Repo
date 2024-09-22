@@ -140,52 +140,58 @@ exports.confirmMail = catchAsync(async (req, res, next) => {
   });
 });
 
-// JobSeeker signin logic
-exports.jobSeekerSignin = catchAsync(async (req, res, next) => {
+// signin logic
+exports.generalSignin = catchAsync(async (req, res, next) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
     return next(new AppError('Please provide email and password', 400));
   }
 
-  const jobseeker = await JobSeeker.findOne({ email }).select('+password +isBanned +isSuspendedPermanently +suspendedUntil +active +emailVerify');
+  let user;
+  let role;
 
-  if (!jobseeker || !(await jobseeker.correctPassword(password, jobseeker.password))) {
+  user = await JobSeeker.findOne({ email }).select('+password +isBanned +isSuspendedPermanently +suspendedUntil +active +emailVerify +role');
+  if (user) {
+    role = 'job seeker';
+  } else {
+    user = await Recruiter.findOne({ email }).select('+password +isBanned +isSuspendedPermanently +suspendedUntil +active +emailVerify +role');
+    if (user) {
+      role = 'recruiter';
+    }
+  }
+
+  if (!user || !(await user.correctPassword(password, user.password))) {
     return next(new AppError('Incorrect email or password', 401));
   }
 
-  if (jobseeker.isBanned === true || jobseeker.isSuspendedPermanently === true || (jobseeker.suspendedUntil && jobseeker.suspendedUntil > new Date())) {
+  if (user.isBanned === true || user.isSuspendedPermanently === true || (user.suspendedUntil && user.suspendedUntil > new Date())) {
     let errorMessage;
-    if (jobseeker.isBanned) {
-      errorMessage = 'You are banned from Lysterpro. Please contact Lysterpro administrator for further information or if you think this is a mistake.';
-    } else {
-      if (jobseeker.suspendedUntil) {
-        const suspensionTimeLeft = jobseeker.suspendedUntil.getTime() - Date.now();
+    if (user.isBanned) {
+      errorMessage = 'You are banned from Lysterpro. Please contact the administrator for further information.';
+    } else if (user.suspendedUntil) {
+        const suspensionTimeLeft = user.suspendedUntil.getTime() - Date.now();
         const daysLeft = Math.ceil(suspensionTimeLeft / (1000 * 3600 * 24)); 
-        errorMessage = `You are temporarily suspended for ${daysLeft} days. Please contact Lysterpro administrator for further information or if you think this is a mistake.`;
-      } else {
-        errorMessage = 'You are suspended permanently from Lysterpro. Please contact Lysterpro administrator for further information or if you think this is a mistake.';
-      }
+        errorMessage = `You are temporarily suspended for ${daysLeft} days. Please contact the administrator for further information.`;
+    } else {
+      errorMessage = 'You are suspended permanently. Please contact the administrator.';
     }
     return next(new AppError(errorMessage, 403));
   }
 
-  if (jobseeker.active === false) {
-    return next(
-      new AppError(
-        'This account does not exist. Please contact the administrator if you think this is a mistake.',
-        403
-      )
-    );
-  };
+  if (user.active === false) {
+    return next(new AppError('This account does not exist. Please contact the administrator.', 403));
+  }
 
-  const message = jobseeker.emailVerify ? `Welcome back ${jobseeker.firstName} ${jobseeker.lastName}` : `Welcome back ${jobseeker.firstName} ${jobseeker.lastName}! Please verify your email address to access all features.`;
-  
-  createSendToken(jobseeker, 200, res, {
+  const message = user.emailVerify ? `Welcome back ${user.firstName} ${user.lastName}` : `Welcome back ${user.firstName} ${user.lastName}! Please verify your email address.`;
+
+  createSendToken(user, 200, res, {
     status: 'success',
+    role: role,
     message
   });
-})
+});
+
 
 // jobseeker logout
 exports.jobSeekerLogout = (req, res) => {

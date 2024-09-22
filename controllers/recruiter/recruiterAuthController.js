@@ -140,52 +140,52 @@ exports.confirmMail = catchAsync(async (req, res, next) => {
   });
 });
 
-// recruiter signin logic
-exports.recruiterSignin = catchAsync(async (req, res, next) => {
-  const { email, password } = req.body;
+// // recruiter signin logic
+// exports.recruiterSignin = catchAsync(async (req, res, next) => {
+//   const { email, password } = req.body;
 
-  if (!email || !password) {
-    return next(new AppError('Please provide email and password', 400));
-  }
+//   if (!email || !password) {
+//     return next(new AppError('Please provide email and password', 400));
+//   }
 
-  const recruiter = await Recruiter.findOne({ email }).select('+password +isBanned +isSuspendedPermanently +suspendedUntil +active +emailVerify');
+//   const recruiter = await Recruiter.findOne({ email }).select('+password +isBanned +isSuspendedPermanently +suspendedUntil +active +emailVerify');
 
-  if (!recruiter || !(await recruiter.correctPassword(password, recruiter.password))) {
-    return next(new AppError('Incorrect email or password', 401));
-  }
+//   if (!recruiter || !(await recruiter.correctPassword(password, recruiter.password))) {
+//     return next(new AppError('Incorrect email or password', 401));
+//   }
 
-  if (recruiter.isBanned === true || recruiter.isSuspendedPermanently === true || (recruiter.suspendedUntil && recruiter.suspendedUntil > new Date())) {
-    let errorMessage;
-    if (recruiter.isBanned) {
-      errorMessage = 'You are banned from Lysterpro. Please contact Lysterpro administrator for further information or if you think this is a mistake.';
-    } else {
-      if (recruiter.suspendedUntil) {
-        const suspensionTimeLeft = recruiter.suspendedUntil.getTime() - Date.now();
-        const daysLeft = Math.ceil(suspensionTimeLeft / (1000 * 3600 * 24)); 
-        errorMessage = `You are temporarily suspended for ${daysLeft} days. Please contact Lysterpro administrator for further information or if you think this is a mistake.`;
-      } else {
-        errorMessage = 'You are suspended permanently from Lysterpro. Please contact Lysterpro administrator for further information or if you think this is a mistake.';
-      }
-    }
-    return next(new AppError(errorMessage, 403));
-  }
+//   if (recruiter.isBanned === true || recruiter.isSuspendedPermanently === true || (recruiter.suspendedUntil && recruiter.suspendedUntil > new Date())) {
+//     let errorMessage;
+//     if (recruiter.isBanned) {
+//       errorMessage = 'You are banned from Lysterpro. Please contact Lysterpro administrator for further information or if you think this is a mistake.';
+//     } else {
+//       if (recruiter.suspendedUntil) {
+//         const suspensionTimeLeft = recruiter.suspendedUntil.getTime() - Date.now();
+//         const daysLeft = Math.ceil(suspensionTimeLeft / (1000 * 3600 * 24)); 
+//         errorMessage = `You are temporarily suspended for ${daysLeft} days. Please contact Lysterpro administrator for further information or if you think this is a mistake.`;
+//       } else {
+//         errorMessage = 'You are suspended permanently from Lysterpro. Please contact Lysterpro administrator for further information or if you think this is a mistake.';
+//       }
+//     }
+//     return next(new AppError(errorMessage, 403));
+//   }
 
-  if (recruiter.active === false) {
-    return next(
-      new AppError(
-        'This account does not exist. Please contact the administrator if you think this is a mistake.',
-        403
-      )
-    );
-  };
+//   if (recruiter.active === false) {
+//     return next(
+//       new AppError(
+//         'This account does not exist. Please contact the administrator if you think this is a mistake.',
+//         403
+//       )
+//     );
+//   };
 
-  const message = recruiter.emailVerify ? `Welcome back ${recruiter.firstName} ${recruiter.lastName}` : `Welcome back ${recruiter.firstName} ${recruiter.lastName}! Please verify your email address to access all features.`;
+//   const message = recruiter.emailVerify ? `Welcome back ${recruiter.firstName} ${recruiter.lastName}` : `Welcome back ${recruiter.firstName} ${recruiter.lastName}! Please verify your email address to access all features.`;
   
-  createSendToken(recruiter, 200, res, {
-    status: 'success',
-    message
-  });
-})
+//   createSendToken(recruiter, 200, res, {
+//     status: 'success',
+//     message
+//   });
+// })
 
 // recruiter logout
 exports.recruiterLogout = (req, res) => {

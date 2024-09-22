@@ -10,7 +10,7 @@ const Router = express.Router();
 Router.post('/signup', recruiterAuthController.recruiterSignup);
 
 // recruiter signin endpoint
-Router.post('/signin', recruiterAuthController.recruiterSignin);
+// Router.post('/signin', recruiterAuthController.recruiterSignin);
 
 // recruiter logout endpoint
 Router.get('/logout', recruiterAuthController.recruiterLogout);
