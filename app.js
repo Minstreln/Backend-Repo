@@ -61,7 +61,7 @@ app.use('/api/v1/category', categoryRouter);
 // Job listing routes
 app.use('/api/v1/jobListing', jobListingRouter);
 // login route for both jobseeker and recruiter
-app.use('/api/v1/login', loginRouter);
+app.use('/api/v1/auth', loginRouter);
 
 app.use('/api/v1/applications-management', applicationManagementRouter);
 
