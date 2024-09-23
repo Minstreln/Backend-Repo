@@ -78,8 +78,21 @@ Router.post('/resume',
     jobSeekerController.resizeJobseekerPhoto,
     jobSeekerController.jobseekerResume
 );
+
+Router.get('/saved-jobs', 
+    jobSeekerAuthController.protect, 
+    jobSeekerAuthController.restrictTo('job seeker'),
+    jobSeekerController.getSavedJobs,
+);
   
 //////////////////////////////// GENERIC ROUTES ////////////////////////////////////////
+
+// save job listing to savedjobs
+Router.post('/save-job/:jobId', 
+  jobSeekerAuthController.protect, 
+  jobSeekerAuthController.restrictTo('job seeker'),
+  jobSeekerController.savedJob,
+);
 
 // jobseeker confirm mail token endpoint
 Router.get('/confirm-mail/:token', jobSeekerAuthController.confirmMail);

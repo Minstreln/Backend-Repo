@@ -39,54 +39,63 @@ const createSendToken = (user, statusCode, res, jsonResponse) => {
 
 // jobseeker signup logic
 exports.jobSeekerSignup = catchAsync(async (req, res) => {
-    const confirmationTokenExpiration = new Date(Date.now() + 5 * 60 * 1000);
-    const confirmationToken = crypto.randomBytes(32).toString('hex');
+  const existingRecruiter = await Recruiter.findOne({ email: req.body.email });
 
-    const newJobSeeker = await JobSeeker.create({
-        firstName: req.body.firstName,
-        lastName: req.body.lastName,
-        email: req.body.email,
-        terms: req.body.terms,
-        phoneNumber: req.body.phoneNumber,
-        password: req.body.password,
-        passwordConfirm: req.body.passwordConfirm,
-        confirmationToken: confirmationToken,
-        confirmationTokenExpiration: confirmationTokenExpiration,
-        createdAt: new Date(),
-    });
+  if (existingRecruiter) {
+      return res.status(400).json({
+          status: 'fail',
+          message: 'This email is already registered as a recruiter. You cannot sign up with same email credentials as a jobseeker.'
+      });
+  }
 
-    const confirmationLink = `${req.protocol}://${req.get('host')}/api/v1/jobseeker/confirm-mail/${confirmationToken}`;
-    
-    // HTML message
-    const message = `
-    <div style="font-family: Arial, sans-serif; line-height: 1.6;">
-        <div style="max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
-            <div style="text-align: center;">
-                <img src="" alt="Lysterpro Logo" style="max-width: 200px; margin-bottom: 20px;">
-            </div>
-            <h2 style="color: #333;">Welcome To The Lysterpro Community!</h2>
-            <p>Hi ${req.body.firstName},</p>
-            <p>Thank you for signing up with Lysterpro. Please confirm your email address by clicking the button below. This link will expire in 5 minutes.</p>
-            <div style="text-align: center; margin: 20px 0;">
-                <a href="${confirmationLink}" style="background-color: #0A65CC; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Confirm Email</a>
-            </div>
-            <p>If the button above does not work, copy and paste the following link into your web browser:</p>
-            <p><a href="${confirmationLink}">${confirmationLink}</a></p>
-            <p>Thank you,<br>The Lysterpro Team</p>
-        </div>
-    </div>
-    `;
+  const confirmationTokenExpiration = new Date(Date.now() + 5 * 60 * 1000);
+  const confirmationToken = crypto.randomBytes(32).toString('hex');
 
-    await sendMail({
-        email: req.body.email,
-        subject: 'Confirm Your Email Address',
-        message,
-    });
+  const newJobSeeker = await JobSeeker.create({
+      firstName: req.body.firstName,
+      lastName: req.body.lastName,
+      email: req.body.email,
+      terms: req.body.terms,
+      phoneNumber: req.body.phoneNumber,
+      password: req.body.password,
+      passwordConfirm: req.body.passwordConfirm,
+      confirmationToken: confirmationToken,
+      confirmationTokenExpiration: confirmationTokenExpiration,
+      createdAt: new Date(),
+  });
 
-    createSendToken(newJobSeeker, 201, res, {
-        status: 'success',
-        message: 'Confirmation email has been sent. Please check your email to confirm your address.'
-    });
+  const confirmationLink = `${req.protocol}://${req.get('host')}/api/v1/jobseeker/confirm-mail/${confirmationToken}`;
+  
+  // HTML message
+  const message = `
+  <div style="font-family: Arial, sans-serif; line-height: 1.6;">
+      <div style="max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
+          <div style="text-align: center;">
+              <img src="" alt="Lysterpro Logo" style="max-width: 200px; margin-bottom: 20px;">
+          </div>
+          <h2 style="color: #333;">Welcome To The Lysterpro Community!</h2>
+          <p>Hi ${req.body.firstName},</p>
+          <p>Thank you for signing up with Lysterpro. Please confirm your email address by clicking the button below. This link will expire in 5 minutes.</p>
+          <div style="text-align: center; margin: 20px 0;">
+              <a href="${confirmationLink}" style="background-color: #0A65CC; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Confirm Email</a>
+          </div>
+          <p>If the button above does not work, copy and paste the following link into your web browser:</p>
+          <p><a href="${confirmationLink}">${confirmationLink}</a></p>
+          <p>Thank you,<br>The Lysterpro Team</p>
+      </div>
+  </div>
+  `;
+
+  await sendMail({
+      email: req.body.email,
+      subject: 'Confirm Your Email Address',
+      message,
+  });
+
+  createSendToken(newJobSeeker, 201, res, {
+      status: 'success',
+      message: 'Confirmation email has been sent. Please check your email to confirm your address.'
+  });
 });
 
 // mail confirmation logic

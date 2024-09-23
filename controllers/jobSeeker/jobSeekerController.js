@@ -10,6 +10,7 @@ const AcademicDetail = require('../../models/jobSeeker/academicDetailModel');
 const Experience = require('../../models/jobSeeker/experienceModel');
 const Resume = require('../../models/jobSeeker/resumeModel');
 const catchAsync = require('../../utils/catchAsync');
+const JobSeeker = require('../../models/jobSeeker/jobSeekerAuthModel');
 // const factory = require('../handler/handlerFactory');
 
 const multerStorage = multer.memoryStorage();
@@ -126,6 +127,55 @@ exports.jobseekerPersonalDetail = catchAsync(async (req, res, next) => {
     });
 });
 
+// Save a job listing logic
+exports.savedJob = catchAsync(async (req, res, next) => {
+    const userId = req.user.id;
+    const jobId = req.params.jobId;
+
+    const user = await JobSeeker.findById(userId);
+
+    if(!user) {
+        return next(new AppError('User profile does not exists'));
+    };
+    
+    const jobExists = user.savedJobs.includes(jobId);
+    
+    if(jobExists) {
+        res.status(409).json({
+            status: 'failed',
+            message: 'This job listing has been saved before by you!'
+        });
+    } else {
+        await JobSeeker.updateOne(
+            { _id: userId },
+            { $push: { savedJobs: jobId } }
+        );
+
+        res.status(200).json({
+            status: 'success',
+            message: 'Job listing saved successfully!',
+        });
+    };
+});
+
+// logic for a jobseeker to get their saved jobs
+exports.getSavedJobs = catchAsync(async (req, res, next) => {
+    const userId = req.user.id;
+
+    const user = await JobSeeker.findById(userId).populate('savedJobs');
+
+    if (!user) {
+        return next(new AppError('User not found', 404));
+    };
+
+    res.status(200).json({
+        status: 'success',
+        results: user.savedJobs.length,
+        data: {
+            savedJobs: user.savedJobs,
+        },
+    });
+});
 
 // jobseeker academics details
 exports.jobseekerAcademicDetail = catchAsync(async (req, res, next) => {
