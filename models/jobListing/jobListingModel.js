@@ -7,6 +7,9 @@ const joblistingSchema = new mongoose.Schema({
         maxLength: [100, 'cannot be more than 100 characters'],
         trim: true,
     },
+    tags: {
+        type: [String],
+    },
     category: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Category',
@@ -30,9 +33,14 @@ const joblistingSchema = new mongoose.Schema({
         maxLength: [255, 'cannot exceed 255 characters'],
         trim: true,
     },
-    salary: {
+    minSalary: {
         type: String,
-        required: [true, 'Please enter the salary for this role'],
+        required: [true, 'Please enter the minimum salary for this role'],
+        maxLength: [255, 'cannot exceed 255 characters'],
+    },
+    maxSalary: {
+        type: String,
+        required: [true, 'Please enter the maximum salary for this role'],
         maxLength: [255, 'cannot exceed 255 characters'],
     },
     jobSetup: {
