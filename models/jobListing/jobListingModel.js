@@ -44,11 +44,11 @@ const joblistingSchema = new mongoose.Schema({
         required: [true, 'Please enter the description for this role'],
     },
     responsibility: {
-        type: String,
+        type: [String],
         required: [true, 'Please enter the responsibility for this role'],
     },
     requirements: {
-        type: String,
+        type: [String],
         required: [true, 'Please enter the requirements for this role'],
     },
     positionLevel: {
@@ -56,7 +56,7 @@ const joblistingSchema = new mongoose.Schema({
         required: [true, 'Please enter the position level for this role'],
     },
     skillsAndQualifications: {
-        type: String,
+        type: [String],
         required: [true, 'Please enter the skills and qualifications for this role']
     },
     recruiter: {
@@ -68,7 +68,7 @@ const joblistingSchema = new mongoose.Schema({
         type: Number,
         required: [true, 'Please specify the minimum years of experience required'],
     },
-    recruiterId: {
+    recruiter: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Recruiter',
         required: [true, 'Could not create job listing at this time']

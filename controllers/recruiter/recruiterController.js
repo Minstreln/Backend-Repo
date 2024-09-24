@@ -8,6 +8,8 @@ const AppError = require('../../utils/appError');
 const RecruiterPersonalDetail = require('../../models/recruiter/personalDetailModel');
 const CompanyDetail = require('../../models/recruiter/companyDetailModel');
 const RecruiterExperience = require('../../models/recruiter/experienceModel');
+const Recruiter = require('../../models/recruiter/recruiterAuthModel');
+const JobListing = require('../../models/jobListing/jobListingModel');
 const catchAsync = require('../../utils/catchAsync');
 // const factory = require('../handler/handlerFactory');
 
@@ -32,6 +34,7 @@ const upload = multer({
 exports.uploadRecruiterPhoto = catchAsync(async (req, res, next) => {
     upload.fields([
         { name: 'profileImage', maxCount: 1 },
+        { name: 'companyLogo', maxCount: 1 },
         { name: 'employmentProof', maxCount: 1 },
     ])(req, res, (err) => {
         if (err) {
@@ -56,7 +59,9 @@ exports.resizeRecruiterPhoto = (req, res, next) => {
             const isPdf = file.mimetype === 'application/pdf';
 
             if (!isPdf) {
-                file.filename = `Recruiter-${req.user.id}-${Date.now()}.jpeg`;
+                const originalName = file.originalname.split('.')[0];
+
+                file.filename = `Recruiter-${originalName}-${req.user.id}-${Date.now()}.jpeg`;
 
                 sharp(file.buffer)
                     .resize(500, 500)
@@ -132,6 +137,9 @@ exports.recruiterCompanyDetail = catchAsync(async (req, res, next) => {
         'yearOfJoining',
         'employmentProof',
         'companyType',
+        'companyLogo',
+        'companyWebsite',
+        'aboutUs',
     );
 
     if (req.files.employmentProof) {
@@ -139,6 +147,13 @@ exports.recruiterCompanyDetail = catchAsync(async (req, res, next) => {
     }
         else {
         return next(new AppError('Please upload a proof of your employment at the company', 400));
+    }
+
+    if (req.files.companyLogo) {
+        filteredBody.companyLogo = req.files.companyLogo[0].filename;
+    }
+        else {
+        return next(new AppError('Please upload a company Logo', 400));
     }
 
     const newRecruiterCompanyDetail = await CompanyDetail.create({
@@ -174,6 +189,78 @@ exports.recruiterExperience = catchAsync(async (req, res, next) => {
         status: 'success',
         data: {
             Experience: newRecruiterExperience,
+        },
+    });
+});
+
+// Save a job seeeker profile logic
+exports.savedCandidates = catchAsync(async (req, res, next) => {
+    const userId = req.user.id;
+    const profileId = req.params.profileId;
+
+    const user = await Recruiter.findById(userId);
+
+    if(!user) {
+        return next(new AppError('User profile does not exists'));
+    };
+    
+    const profileExists = user.savedCandidates.includes(profileId);
+    
+    if(profileExists) {
+        res.status(409).json({
+            status: 'failed',
+            message: 'This candidate profile has been saved before by you!'
+        });
+    } else {
+        await Recruiter.updateOne(
+            { _id: userId },
+            { $push: { savedCandidates: profileId } }
+        );
+
+        res.status(200).json({
+            status: 'success',
+            message: 'Candidate saved successfully!',
+        });
+    };
+});
+
+// logic for a recruiter to get their saved Job seeker
+exports.getSavedCandidates = catchAsync(async (req, res, next) => {
+    const userId = req.user.id;
+
+    const user = await Recruiter.findById(userId).populate('savedCandidates');
+
+    if (!user) {
+        return next(new AppError('User not found', 404));
+    };
+
+    res.status(200).json({
+        status: 'success',
+        results: user.savedCandidates.length,
+        data: {
+            savedCandidates: user.savedCandidates,
+        },
+    });
+});
+
+// get open jobs related to a recruiter
+exports.getOpenJobs = catchAsync(async (req, res, next) => {
+    const recruiterId = req.user.id;
+
+    const openJobs = await JobListing.find({
+        status: 'open',
+        recruiter: recruiterId,
+    });
+
+    if (!openJobs || openJobs.length === 0) {
+        return next(new AppError('No jobs open for this recruiter'))
+    }
+
+    res.status(200).json({
+        status: 'success',
+        results: openJobs.length,
+        data: {
+            openJobs,
         },
     });
 });

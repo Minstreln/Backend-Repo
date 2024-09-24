@@ -6,7 +6,7 @@ const factory = require('../handler/handlerFactory');
 
 // add Job Listing logic
 exports.addJobListing = catchAsync(async (req, res) => {
-    const recruiterId = req.user._id;
+    const recruiterId = req.user.id;
   
     const newJobListing = await JobListing.create({
         position: req.body.position,

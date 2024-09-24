@@ -35,6 +35,13 @@ const recruiterSchema = mongoose.Schema({
         type: String,
         default: 'recruiter',
     },
+    savedCandidates: [
+        {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'JobSeeker',
+        index: true,
+    }
+],
     password: {
         type: String,
         required: [true, 'Please enter a password!'],

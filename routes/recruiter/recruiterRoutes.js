@@ -71,7 +71,28 @@ Router.post('/experience',
     recruiterController.recruiterExperience
 );
 
+// get saved jobseeker
+Router.get('/saved-jobseeker', 
+    recruiterAuthController.protect, 
+    recruiterAuthController.restrictTo('recruiter'),
+    recruiterController.getSavedCandidates,
+);
+
+// get my open job listings
+Router.get('/open-jobs', 
+    recruiterAuthController.protect, 
+    recruiterAuthController.restrictTo('recruiter'),
+    recruiterController.getOpenJobs,
+);
+
 //////////////////////////////// GENERIC ROUTES ////////////////////////////////////////
+
+// save job seeker profile
+Router.post('/save-jobseeker/:profileId', 
+    recruiterAuthController.protect, 
+    recruiterAuthController.restrictTo('recruiter'),
+    recruiterController.savedCandidates,
+);
 
 // recruiter confirm mail token endpoint
 Router.get('/confirm-mail/:token', recruiterAuthController.confirmMail);
