@@ -264,3 +264,263 @@ exports.getOpenJobs = catchAsync(async (req, res, next) => {
         },
     });
 });
+
+
+
+
+
+
+// get recruiter's personal details
+exports.getPersonalDetails = catchAsync(async (req, res, next) => {
+    const userId = req.user.id;
+
+    const personalDetails = await RecruiterPersonalDetail.find({ user: userId });
+
+    if (!personalDetails) {
+        return next(new AppError, 'No personal details found for this user.' );
+    };
+
+    res.status(200).json({
+        status: 'success',
+        results: personalDetails.length,
+        data: {
+            personalDetails
+        },
+    });
+});
+
+// delete recruiter's personal details
+exports.deletePersonalDetails = catchAsync(async (req, res, next) => {
+    const userId = req.user.id;
+    const personalDetailId = req.params.personalDetailId;
+
+    const personalDetail = await RecruiterPersonalDetail.findOne({ _id: personalDetailId, user: userId });
+
+    if (!personalDetail) {
+        return next(new AppError, 'No personal details found for this user.' );
+    };
+
+    await personalDetail.remove();
+
+    res.status(204).json({
+        status: 'success',
+        data: null
+    });
+});
+
+// Update personal details
+exports.updatePersonalDetail = catchAsync(async (req, res, next) => {
+    const personalDetailId = req.params.personalDetailId;
+    const userId = req.user.id;
+
+    const filteredBody = filterObj(
+        req.body,
+        'profileImage',
+        'middleName',
+        'location',
+        'linkedAccount',
+    );
+
+    if (req.files && req.files.profileImage) {
+        filteredBody.profileImage = req.files.profileImage[0].filename;
+    } else {
+        console.log('No profile Image file uploaded');
+    }    
+
+    const updatedPersonalDetail = await RecruiterPersonalDetail.findOneAndUpdate(
+        { _id: personalDetailId, user: userId },
+        filteredBody,
+        {
+            new: true,
+            runValidators: true
+        }
+    );
+
+    if (!updatedPersonalDetail) {
+        return next(new AppError('No personal details found with that ID for this user.', 404));
+    }
+
+    res.status(200).json({
+        status: 'success',
+        data: {
+            Personal: updatedPersonalDetail,
+        },
+    });
+});
+
+
+
+
+
+
+
+
+
+
+
+
+// get recruiter's experience details
+exports.getExperienceDetails = catchAsync(async (req, res, next) => {
+    const userId = req.user.id;
+
+    const experienceDetails = await RecruiterExperience.find({ user: userId });
+
+    if (!experienceDetails) {
+        return next(new AppError, 'No experience details found for this user.' );
+    };
+
+    res.status(200).json({
+        status: 'success',
+        results: experienceDetails.length,
+        data: {
+            experienceDetails
+        },
+    });
+});
+
+// delete recruiter's experience details
+exports.deleteExperienceDetails = catchAsync(async (req, res, next) => {
+    const userId = req.user.id;
+    const experienceDetailId = req.params.experienceDetailId;
+
+    const experienceDetail = await RecruiterExperience.findOne({ _id: experienceDetailId, user: userId });
+
+    if (!experienceDetail) {
+        return next(new AppError, 'No Experience details found for this user.' );
+    };
+
+    await experienceDetail.remove();
+
+    res.status(204).json({
+        status: 'success',
+        data: null
+    });
+});
+
+// Update a specific experience detail by ID
+exports.updateExperienceDetail = catchAsync(async (req, res, next) => {
+    const userId = req.user.id;
+    const experienceDetailId = req.params.experienceDetailId;
+
+    let experienceDetail = await RecruiterExperience.findOne({ _id: experienceDetailId, user: userId });
+
+    if (!experienceDetail) {
+        return next(new AppError('No experience detail found with that ID for this user.', 404));
+    }
+
+    experienceDetail = await RecruiterExperience.findOneAndUpdate(
+        { _id: experienceDetailId, user: userId },
+        req.body,
+        {
+            new: true,
+            runValidators: true
+        }
+    );
+
+    res.status(200).json({
+        status: 'success',
+        data: {
+            experienceDetail,
+        },
+    });
+});
+
+
+
+
+
+
+
+
+
+
+
+// get recruiter's company details
+exports.getCompanyDetails = catchAsync(async (req, res, next) => {
+    const userId = req.user.id;
+
+    const companyDetails = await CompanyDetail.find({ user: userId });
+
+    if (!companyDetails) {
+        return next(new AppError, 'No academic details found for this user.' );
+    };
+
+    res.status(200).json({
+        status: 'success',
+        results: companyDetails.length,
+        data: {
+            companyDetails
+        },
+    });
+});
+
+// delete recruiter's company details
+exports.deleteCompanyDetails = catchAsync(async (req, res, next) => {
+    const userId = req.user.id;
+    const companyDetailId = req.params.companyDetailId;
+
+    const companyDetail = await CompanyDetail.findOne({ _id: companyDetailId, user: userId });
+
+    if (!companyDetail) {
+        return next(new AppError, 'No academic details found for this user.' );
+    };
+
+    await companyDetail.remove();
+
+    res.status(204).json({
+        status: 'success',
+        data: null
+    });
+});
+
+// Update company details
+exports.updateCompanyDetail = catchAsync(async (req, res, next) => {
+    const companyDetailId = req.params.companyDetailId;
+    const userId = req.user.id;
+
+    const filteredBody = filterObj(
+        req.body,
+        'companyName',
+        'location',
+        'yearOfJoining',
+        'employmentProof',
+        'companyType',
+        'companyLogo',
+        'companyWebsite',
+        'aboutUs',
+    );
+
+    if (req.files.employmentProof) {
+        filteredBody.employmentProof = req.files.employmentProof[0].filename;
+    }
+        else {
+        return next(new AppError('Please upload a proof of your employment at the company', 400));
+    }
+
+    if (req.files.companyLogo) {
+        filteredBody.companyLogo = req.files.companyLogo[0].filename;
+    }
+        else {
+        return next(new AppError('Please upload a company Logo', 400));
+    }
+
+    const updatedCompanyDetail = await CompanyDetail.findOneAndUpdate(
+        { _id: companyDetailId, user: userId },
+        filteredBody,
+        {
+            new: true,
+            runValidators: true
+        }
+    );
+
+    if (!updatedCompanyDetail) {
+        return next(new AppError('No company details found with that ID for this user.', 404));
+    }
+
+    res.status(200).json({
+        status: 'success',
+        data: {
+            Company: updatedCompanyDetail,
+        },
+    });
+});

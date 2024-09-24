@@ -70,6 +70,81 @@ Router.post('/experience',
     jobSeekerController.jobseekerExperience
 );
 
+
+//////////////////////////// profile CRUD routes /////////////////////////
+
+// get academic detail
+Router.get('/get-academic-detail', 
+    jobSeekerAuthController.protect, 
+    jobSeekerAuthController.restrictTo('job seeker'),
+    jobSeekerController.getAcademicDetails
+);
+
+// delete academic detail
+Router.delete('/delete-academic-detail/:academicDetailId', 
+    jobSeekerAuthController.protect, 
+    jobSeekerAuthController.restrictTo('job seeker'),
+    jobSeekerController.deleteAcademicDetails
+);
+
+// update academic detail
+Router.patch('/update-academic-detail/:academicDetailId', 
+    jobSeekerAuthController.protect, 
+    jobSeekerAuthController.restrictTo('job seeker'),
+    jobSeekerController.uploadJobseekerPhoto,
+    jobSeekerController.resizeJobseekerPhoto,
+    jobSeekerController.updateAcademicDetail
+);
+
+// get experience detail
+Router.get('/get-experience-detail', 
+    jobSeekerAuthController.protect, 
+    jobSeekerAuthController.restrictTo('job seeker'),
+    jobSeekerController.getExperienceDetails
+);
+
+// delete experience detail
+Router.delete('/delete-experience-detail/:experienceDetailId', 
+    jobSeekerAuthController.protect, 
+    jobSeekerAuthController.restrictTo('job seeker'),
+    jobSeekerController.deleteExperienceDetails
+);
+
+// update experience detail
+Router.patch('/update-experience-detail/:experienceDetailId', 
+    jobSeekerAuthController.protect, 
+    jobSeekerAuthController.restrictTo('job seeker'),
+    jobSeekerController.uploadJobseekerPhoto,
+    jobSeekerController.resizeJobseekerPhoto,
+    jobSeekerController.updateExperienceDetail
+);
+
+// get personal detail
+Router.get('/get-personal-detail', 
+    jobSeekerAuthController.protect, 
+    jobSeekerAuthController.restrictTo('job seeker'),
+    jobSeekerController.getPersonalDetails
+);
+
+// delete personal detail
+Router.delete('/delete-personal-detail/:personalDetailId', 
+    jobSeekerAuthController.protect, 
+    jobSeekerAuthController.restrictTo('job seeker'),
+    jobSeekerController.deletePersonalDetails
+);
+
+// update personal detail
+Router.patch('/update-personal-detail/:personalDetailId', 
+    jobSeekerAuthController.protect, 
+    jobSeekerAuthController.restrictTo('job seeker'),
+    jobSeekerController.uploadJobseekerPhoto,
+    jobSeekerController.resizeJobseekerPhoto,
+    jobSeekerController.updatePersonalDetail
+);
+
+
+///////////////////////////////////////////////////////////////////////////////
+
 // jobseeker upload resume endpoint
 Router.post('/resume',
     jobSeekerAuthController.protect, 

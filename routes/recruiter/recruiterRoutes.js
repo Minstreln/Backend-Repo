@@ -71,6 +71,78 @@ Router.post('/experience',
     recruiterController.recruiterExperience
 );
 
+
+//////////////////////////// profile CRUD routes /////////////////////////
+
+// get company detail
+Router.get('/get-company-detail',    
+    recruiterAuthController.protect, 
+    recruiterAuthController.restrictTo('recruiter'),
+    recruiterController.getCompanyDetails
+);
+
+// delete company detail
+Router.delete('/delete-company-detail/:companyDetailId',
+    recruiterAuthController.protect, 
+    recruiterAuthController.restrictTo('recruiter'),
+    recruiterController.deleteCompanyDetails
+);
+
+// update company detail
+Router.patch('/update-company-detail/:companyDetailId', 
+    recruiterAuthController.protect, 
+    recruiterAuthController.restrictTo('recruiter'),
+    recruiterController.uploadRecruiterPhoto,
+    recruiterController.resizeRecruiterPhoto,
+    recruiterController.updateCompanyDetail
+);
+
+// get experience detail
+Router.get('/get-experience-detail', 
+    recruiterAuthController.protect, 
+    recruiterAuthController.restrictTo('recruiter'),
+    recruiterController.getExperienceDetails
+);
+
+// delete experience detail
+Router.delete('/delete-experience-detail/:experienceDetailId', 
+    recruiterAuthController.protect, 
+    recruiterAuthController.restrictTo('recruiter'),
+    recruiterController.deleteExperienceDetails
+);
+
+// update experience detail
+Router.patch('/update-experience-detail/:experienceDetailId', 
+    recruiterAuthController.protect, 
+    recruiterAuthController.restrictTo('recruiter'),
+    recruiterController.updateExperienceDetail
+);
+
+// get personal detail
+Router.get('/get-personal-detail',    
+    recruiterAuthController.protect, 
+    recruiterAuthController.restrictTo('recruiter'),
+    recruiterController.getPersonalDetails
+);
+
+// delete personal detail
+Router.delete('/delete-personal-detail/:personalDetailId',
+    recruiterAuthController.protect, 
+    recruiterAuthController.restrictTo('recruiter'),
+    recruiterController.deletePersonalDetails
+);
+
+// update personal detail
+Router.patch('/update-personal-detail/:personalDetailId', 
+    recruiterAuthController.protect, 
+    recruiterAuthController.restrictTo('recruiter'),
+    recruiterController.uploadRecruiterPhoto,
+    recruiterController.resizeRecruiterPhoto,
+    recruiterController.updatePersonalDetail
+);
+
+///////////////////////////////////////////////////////////////////////////////
+
 // get saved jobseeker
 Router.get('/saved-jobseeker', 
     recruiterAuthController.protect, 

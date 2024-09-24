@@ -15,11 +15,7 @@ const academicDetailSchema = mongoose.Schema({
         type: Number,
         required: [true, 'Year of completion is required'],
     },
-    highSchCertificate: {
-        type: String,
-        required: [true, 'Your high school certificate is required']
-    },
-    degreeCertificate: {
+    certificate: {
         type: String,
         required: [true, 'Your degree certificate is required']
     },

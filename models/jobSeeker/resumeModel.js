@@ -1,6 +1,10 @@
 const mongoose = require('mongoose');
 
 const resumeSchema = mongoose.Schema({
+    title: {
+        type: String,
+        required: [true, 'A title is requireed!'],
+    },
     resume: {
         type: String,
         required: [true, 'Your resume is required']
