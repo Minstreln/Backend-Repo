@@ -31,6 +31,8 @@ app.use(cors())
 
 app.use(cookieParser());
 
+app.set('trust proxy', 1);
+
 app.use(express.static(`${__dirname}/public}`));
 
 app.use(express.json());
