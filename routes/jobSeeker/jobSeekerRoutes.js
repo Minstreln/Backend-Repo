@@ -154,6 +154,29 @@ Router.post('/resume',
     jobSeekerController.jobseekerResume
 );
 
+// get a jobseeker's resume(s)
+Router.get('/myResume', 
+    jobSeekerAuthController.protect, 
+    jobSeekerAuthController.restrictTo('job seeker'),
+    jobSeekerController.getMyResume
+);
+
+// update a jobseeker resume endpoint
+Router.patch('/update-resume/:resumeId',
+    jobSeekerAuthController.protect, 
+    jobSeekerAuthController.restrictTo('job seeker'),
+    jobSeekerController.uploadJobseekerPhoto,
+    jobSeekerController.resizeJobseekerPhoto,
+    jobSeekerController.updateJobseekerResume
+);
+
+// delete a jobseeker's resume(s)
+Router.delete('/delete-resume/:resumeId', 
+    jobSeekerAuthController.protect, 
+    jobSeekerAuthController.restrictTo('job seeker'),
+    jobSeekerController.deleteJobseekerResume
+);
+
 Router.get('/saved-jobs', 
     jobSeekerAuthController.protect, 
     jobSeekerAuthController.restrictTo('job seeker'),

@@ -16,6 +16,8 @@ exports.addJobListing = catchAsync(async (req, res) => {
         location: req.body.location,
         maxSalary: req.body.maxSalary,
         minSalary: req.body.minSalary,
+        salaryType: req.body.salaryType,
+        city: req.body.city,
         tags: req.body.tags,
         jobSetup: req.body.jobSetup,
         expirationDate: req.body.expirationDate,

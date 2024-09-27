@@ -35,7 +35,7 @@ exports.uploadJobseekerPhoto = catchAsync(async (req, res, next) => {
     upload.fields([
         { name: 'profileImage', maxCount: 1 },
         { name: 'certificate', maxCount: 1 },
-        { name: 'resume', maxCount: 1 }
+        { name: 'resume', maxCount: 5 }
     ])(req, res, (err) => {
         if (err) {
             if (err instanceof multer.MulterError) {
@@ -74,7 +74,7 @@ exports.resizeJobseekerPhoto = (req, res, next) => {
                 const originalName = file.originalname.split('.')[0];
                 const fileExtension = file.originalname.split('.').pop();
 
-                file.filename = `${originalName}-${req.user.id}.${fileExtension}`;
+                file.filename = `${originalName}-${req.user.id}-${Date.now()}.${fileExtension}`;
 
                 fs.writeFile(`public/img/jobseeker/pdf/${file.filename}`, file.buffer, (err) => {
                     if (err) {
@@ -232,32 +232,46 @@ exports.jobseekerExperience = catchAsync(async (req, res, next) => {
 
 // jobseeker upload resume
 exports.jobseekerResume = catchAsync(async (req, res, next) => {
-    const filteredBody = filterObj(
-        req.body,
-        'resume',
-        'title',
-    );
+    const filteredBody = filterObj(req.body, 'title');
     
     if (req.files.resume) {
-        filteredBody.resume = req.files.resume[0].filename;
-    }
-    else {
-        return next(new AppError('Please upload your resume', 400));
-    }
+        const resumeUploads = req.files.resume.map(async (file) => {
+            return Resume.create({
+                resume: file.filename,
+                title: filteredBody.title || file.originalname,
+                user: req.user.id,
+            });
+        });
 
-    const newJobseekerResume = await Resume.create({
-        ...filteredBody,
-        user: req.user.id
-    });
+        const newJobseekerResumes = await Promise.all(resumeUploads);
+
+        res.status(200).json({
+            status: 'success',
+            data: {
+                resumeDetails: newJobseekerResumes,
+            },
+        });
+    } 
+});
+
+// get jobseeker resume(s)
+exports.getMyResume = catchAsync(async (req, res, next) => {
+    const userId = req.user.id;
+
+    const userResume = await Resume.find({ user: userId });
+
+    if(!userResume) {
+        return next(new AppError('No resume found for you, please upload a resume', 404));
+    };
 
     res.status(200).json({
         status: 'success',
+        results: userResume.length,
         data: {
-            resumeDetails: newJobseekerResume,
+            userResume
         },
     });
 });
-
 
 // get jobseeker's academic details
 exports.getAcademicDetails = catchAsync(async (req, res, next) => {
@@ -338,21 +352,73 @@ exports.updateAcademicDetail = catchAsync(async (req, res, next) => {
     });
 });
 
+// update jobseekers resume
+exports.updateJobseekerResume = catchAsync(async (req, res, next) => {
+    const resumeId = req.params.resumeId;
+    const userId = req.user.id;
 
+    const filteredBody = filterObj(req.body, 'title');
 
+    const resume = await Resume.findOne({ _id: resumeId, user: userId });
 
+    if (!resume) {
+        return next(new AppError('No resume found with that ID for this user.', 404));
+    }
 
+    if (req.files && req.files.resume) {
+        const newResumeFilename = req.files.resume[0].filename;
 
+        filteredBody.resume = newResumeFilename;
 
+        const oldResumePath = path.join(__dirname, '../../public/img/jobseeker/pdf/', resume.resume);
+        fs.unlink(oldResumePath, (err) => {
+            if (err) {
+                console.error('Error deleting old resume file:', err);
+            } else {
+                console.log('Old resume file deleted successfully.');
+            }
+        });
+    }
 
+    const updatedResume = await Resume.findOneAndUpdate(
+        { _id: resumeId, user: userId },
+        filteredBody,
+        {
+            new: true,
+            runValidators: true,
+        }
+    );
 
+    if (!updatedResume) {
+        return next(new AppError('Failed to update the resume. Please try again.', 400));
+    }
 
+    res.status(200).json({
+        status: 'success',
+        data: {
+            resume: updatedResume,
+        },
+    });
+});
 
+// delete jobseeker resume(s)
+exports.deleteJobseekerResume = catchAsync(async (req, res, next) => {
+    const userId = req.user.id;
+    const resumeId = req.params.resumeId;
+    
+    const resume = await Resume.findOne({ _id: resumeId, user: userId });
 
+    if (!resume) {
+        return next(new AppError('No resume found with that ID for this user.', 404));
+    }
 
+    await resume.remove();
 
-
-
+    res.status(204).json({
+        status: 'success',
+        data: null,
+    });
+});
 
 // get jobseeker's experience details
 exports.getExperienceDetails = catchAsync(async (req, res, next) => {
@@ -419,36 +485,6 @@ exports.updateExperienceDetail = catchAsync(async (req, res, next) => {
         },
     });
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // get jobseeker's personal details
 exports.getPersonalDetails = catchAsync(async (req, res, next) => {

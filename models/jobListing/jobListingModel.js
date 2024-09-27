@@ -21,6 +21,17 @@ const joblistingSchema = new mongoose.Schema({
         maxLength: [255, 'cannot exceed 255 characters'],
         trim: true,
     },
+    salaryType: {
+        type: String,
+        required: [true, 'Please enter the salary type, either yearly or monthly'],
+        enum: ['Yearly', 'Monthly'],
+    },
+    city: {
+        type: String,
+        required: [true, 'Please enter the city'],
+        maxLength: [255, 'cannot exceed 255 characters'],
+        trim: true,
+    },
     employmentType: {
         type: String,
         required: [true, 'Please enter the employment type for this role'],
