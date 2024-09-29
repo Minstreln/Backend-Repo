@@ -34,10 +34,10 @@ exports.createApplication = catchAsync(async (req, res, next) => {
     // Notify recruiter via WebSocket
     notifyRecruiter(
         JSON.stringify({
-            message: `New job application received from ${req.user.email}`,
-            jobListing: populatedApplication.jobListing.title,
-            applicant: req.user.name,
-            email: req.user.email,
+            message: `New job application received from ${populatedApplication.jobSeeker.firstName} ${populatedApplication.jobSeeker.lastName}`,
+            jobListing: populatedApplication.jobListing.position,
+            // applicant: req.user.name,
+            ApplicantEmail: req.user.email,
         })
     );
 
