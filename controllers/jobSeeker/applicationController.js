@@ -2,10 +2,48 @@ const applicationModel = require('../../models/jobSeeker/applicationModel');
 const AppError = require('../../utils/appError');
 const catchAsync = require('../../utils/catchAsync');
 const { body, validationResult } = require('express-validator');
-const { notifyRecruiter } = require('../../utils/websocket'); // Import WebSocket notification
+const { notifyRecruiter } = require('../../utils/websocket');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
 
-// Create a new job application
+const uploadDir = 'uploads/resumes';
+if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir, { recursive: true });
+}
+
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, uploadDir); 
+    },
+    filename: (req, file, cb) => {
+        cb(null, `${file.fieldname}-${Date.now()}${path.extname(file.originalname)}`);
+    }
+});
+
+const fileFilter = (req, file, cb) => {
+    const filetypes = /pdf/;
+    const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+    const mimetype = filetypes.test(file.mimetype);
+
+    if (mimetype && extname) {
+        return cb(null, true);
+    } else {
+        cb(new AppError('Only PDF files are allowed', 400), false);
+    }
+};
+
+const upload = multer({
+    storage,
+    fileFilter,
+    limits: { fileSize: 1024 * 1024 * 5 } 
+});
+
+exports.uploadResume = upload.single('resume');
+
+// Create a job application
 exports.createApplication = catchAsync(async (req, res, next) => {
+    // Validate input fields
     await body('jobListing').notEmpty().withMessage('Job listing is required').run(req);
     await body('coverLetter').notEmpty().withMessage('Cover letter is required').run(req);
 
@@ -14,33 +52,36 @@ exports.createApplication = catchAsync(async (req, res, next) => {
         return next(new AppError(errors.array().map(err => err.msg).join(', '), 400));
     }
 
-    const { jobListing, experience, personalDetails, coverLetter, resume } = req.body;
+    // Check for uploaded file
+    if (!req.file) {
+        return next(new AppError('Please upload a PDF resume', 400));
+    }
 
-    // Create the job application with the logged-in user
+    // Create application in the database
+    const { jobListing, experience, personalDetails, coverLetter } = req.body;
     const newApplication = await applicationModel.create({
         jobListing,
         jobSeeker: req.user._id,
         experience,
         personalDetails,
         coverLetter,
-        resume
+        resume: req.file.path 
     });
 
-    // Populate the jobListing field to get the full data
+    // Populate fields and notify recruiter
     const populatedApplication = await applicationModel.findById(newApplication._id)
-        .populate('jobListing')  // Make sure 'jobListing' is the field name in your model
+        .populate('jobListing')
         .populate('jobSeeker');
 
-    // Notify recruiter via WebSocket
     notifyRecruiter(
         JSON.stringify({
             message: `New job application received from ${populatedApplication.jobSeeker.firstName} ${populatedApplication.jobSeeker.lastName}`,
             jobListing: populatedApplication.jobListing.position,
-            // applicant: req.user.name,
             ApplicantEmail: req.user.email,
         })
     );
 
+    // Send successful response
     res.status(201).json({
         status: 'success',
         data: {
@@ -49,12 +90,13 @@ exports.createApplication = catchAsync(async (req, res, next) => {
     });
 });
 
-
 // Get all applications
 exports.getAllApplications = catchAsync(async (req, res, next) => {
-    const applications = await applicationModel.find()
-        .populate('jobListing')  // Make sure 'jobListing' is the field name in your model
-        .populate('jobSeeker');
+    const applications = await applicationModel.find().populate('jobListing').populate('jobSeeker');
+
+    if (!applications) {
+        return next(new AppError('No applications found', 404));
+    }
 
     res.status(200).json({
         status: 'success',
@@ -66,10 +108,10 @@ exports.getAllApplications = catchAsync(async (req, res, next) => {
 });
 
 
-// Get a single application by ID
+// Get application by ID
 exports.getApplicationById = catchAsync(async (req, res, next) => {
     const application = await applicationModel.findById(req.params.id)
-        .populate('job')
+        .populate('jobListing')
         .populate('jobSeeker');
 
     if (!application) {
@@ -84,7 +126,7 @@ exports.getApplicationById = catchAsync(async (req, res, next) => {
     });
 });
 
-// Update an application by ID
+// Update application by ID
 exports.updateApplication = catchAsync(async (req, res, next) => {
     const application = await applicationModel.findByIdAndUpdate(
         req.params.id,
@@ -107,7 +149,7 @@ exports.updateApplication = catchAsync(async (req, res, next) => {
     });
 });
 
-// Delete an application by ID
+// Delete application by ID
 exports.deleteApplication = catchAsync(async (req, res, next) => {
     const application = await applicationModel.findByIdAndDelete(req.params.id);
 

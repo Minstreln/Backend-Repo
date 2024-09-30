@@ -25,8 +25,8 @@ const JobApplicationSchema = new mongoose.Schema({
         maxLength: [1000, 'Cover letter cannot exceed 1000 characters']
     },
     resume: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Resume',
+        type: String,
+        required: [true, 'Resume is required'],
     },
     status: {
         type: String,
