@@ -7,7 +7,10 @@ const Router = express.Router();
 Router.use(authController.protect);
 
 // Route to create a new application
-Router.post('/create', applicationController.createApplication);
+Router.post('/create', 
+    applicationController.uploadResume,
+    applicationController.createApplication
+);
 
 // Route to get all applications for a job listing
 Router.get('/', applicationController.getAllApplications);
