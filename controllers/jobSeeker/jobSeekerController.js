@@ -103,7 +103,9 @@ exports.jobseekerPersonalDetail = catchAsync(async (req, res, next) => {
         'profileImage',
         'middleName',
         'location',
-        'linkedAccount',
+        'github',
+        'linkedin',
+        'portfolioSite',
         'aboutMe',
     );
     
@@ -490,10 +492,12 @@ exports.updateExperienceDetail = catchAsync(async (req, res, next) => {
 exports.getPersonalDetails = catchAsync(async (req, res, next) => {
     const userId = req.user.id;
 
-    const personalDetails = await PersonalDetail.find({ user: userId });
+    const personalDetails = await PersonalDetail.findOne({ user: userId }).populate(
+        'user'
+    );
 
     if (!personalDetails) {
-        return next(new AppError, 'No personal details found for this user.' );
+        return next(new AppError('No personal details found for this user.'));
     };
 
     res.status(200).json({
@@ -513,7 +517,7 @@ exports.deletePersonalDetails = catchAsync(async (req, res, next) => {
     const personalDetail = await PersonalDetail.findOne({ _id: personalDetailId, user: userId });
 
     if (!personalDetail) {
-        return next(new AppError, 'No personal details found for this user.' );
+        return next(new AppError('No personal details found for this user.'));
     };
 
     await personalDetail.remove();
@@ -534,7 +538,9 @@ exports.updatePersonalDetail = catchAsync(async (req, res, next) => {
         'profileImage',
         'middleName',
         'location',
-        'linkedAccount',
+        'github',
+        'linkedin',
+        'portfolioSite',
         'aboutMe',
     );
 
