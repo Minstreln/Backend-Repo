@@ -15,7 +15,13 @@ const personalDetailSchema = mongoose.Schema({
         type: String,
         required: [true, 'please upload a profile picture'],
     },
-    linkedAccount: {
+    github: {
+        type: String,
+    },
+    linkedin: {
+        type: String,
+    },
+    portfolioSite: {
         type: String,
     },
     user: {

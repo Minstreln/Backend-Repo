@@ -49,8 +49,8 @@ Router.patch('/update-password',
 Router.post('/personal-detail',
     jobSeekerAuthController.protect, 
     jobSeekerAuthController.restrictTo('job seeker'), 
-    jobSeekerController.uploadJobseekerPhoto,
-    jobSeekerController.resizeJobseekerPhoto,
+    // jobSeekerController.uploadJobseekerPhoto,
+    // jobSeekerController.resizeJobseekerPhoto,
     jobSeekerController.jobseekerPersonalDetail
 );
 
@@ -58,8 +58,8 @@ Router.post('/personal-detail',
 Router.post('/academic-detail',
     jobSeekerAuthController.protect, 
     jobSeekerAuthController.restrictTo('job seeker'), 
-    jobSeekerController.uploadJobseekerPhoto,
-    jobSeekerController.resizeJobseekerPhoto,
+    // jobSeekerController.uploadJobseekerPhoto,
+    // jobSeekerController.resizeJobseekerPhoto,
     jobSeekerController.jobseekerAcademicDetail
 );
 
@@ -70,6 +70,41 @@ Router.post('/experience',
     jobSeekerController.jobseekerExperience
 );
 
+Router.patch('/update-details',
+    jobSeekerAuthController.protect, 
+    jobSeekerAuthController.restrictTo('job seeker'),
+    jobSeekerController.updateJobseekerDetails
+);
+
+// get experience detail
+Router.get('/get-experience-detail', 
+    jobSeekerAuthController.protect, 
+    jobSeekerAuthController.restrictTo('job seeker'),
+    jobSeekerController.getExperienceDetails
+);
+
+// get personal detail
+Router.get('/get-personal-detail', 
+    jobSeekerAuthController.protect, 
+    jobSeekerAuthController.restrictTo('job seeker'),
+    jobSeekerController.getPersonalDetails
+);
+
+// jobseeker upload resume endpoint
+Router.post('/resume',
+    jobSeekerAuthController.protect, 
+    jobSeekerAuthController.restrictTo('job seeker'),
+    // jobSeekerController.uploadJobseekerPhoto,
+    // jobSeekerController.resizeJobseekerPhoto,
+    jobSeekerController.jobseekerResume
+);
+
+// get a jobseeker's resume(s)
+Router.get('/myResume', 
+    jobSeekerAuthController.protect, 
+    jobSeekerAuthController.restrictTo('job seeker'),
+    jobSeekerController.getMyResume
+);
 
 //////////////////////////// profile CRUD routes /////////////////////////
 
@@ -91,16 +126,9 @@ Router.delete('/delete-academic-detail/:academicDetailId',
 Router.patch('/update-academic-detail/:academicDetailId', 
     jobSeekerAuthController.protect, 
     jobSeekerAuthController.restrictTo('job seeker'),
-    jobSeekerController.uploadJobseekerPhoto,
-    jobSeekerController.resizeJobseekerPhoto,
+    // jobSeekerController.uploadJobseekerPhoto,
+    // jobSeekerController.resizeJobseekerPhoto,
     jobSeekerController.updateAcademicDetail
-);
-
-// get experience detail
-Router.get('/get-experience-detail', 
-    jobSeekerAuthController.protect, 
-    jobSeekerAuthController.restrictTo('job seeker'),
-    jobSeekerController.getExperienceDetails
 );
 
 // delete experience detail
@@ -114,16 +142,9 @@ Router.delete('/delete-experience-detail/:experienceDetailId',
 Router.patch('/update-experience-detail/:experienceDetailId', 
     jobSeekerAuthController.protect, 
     jobSeekerAuthController.restrictTo('job seeker'),
-    jobSeekerController.uploadJobseekerPhoto,
-    jobSeekerController.resizeJobseekerPhoto,
+    // jobSeekerController.uploadJobseekerPhoto,
+    // jobSeekerController.resizeJobseekerPhoto,
     jobSeekerController.updateExperienceDetail
-);
-
-// get personal detail
-Router.get('/get-personal-detail', 
-    jobSeekerAuthController.protect, 
-    jobSeekerAuthController.restrictTo('job seeker'),
-    jobSeekerController.getPersonalDetails
 );
 
 // delete personal detail
@@ -137,36 +158,19 @@ Router.delete('/delete-personal-detail/:personalDetailId',
 Router.patch('/update-personal-detail/:personalDetailId', 
     jobSeekerAuthController.protect, 
     jobSeekerAuthController.restrictTo('job seeker'),
-    jobSeekerController.uploadJobseekerPhoto,
-    jobSeekerController.resizeJobseekerPhoto,
+    // jobSeekerController.uploadJobseekerPhoto,
+    // jobSeekerController.resizeJobseekerPhoto,
     jobSeekerController.updatePersonalDetail
 );
 
-
 ///////////////////////////////////////////////////////////////////////////////
-
-// jobseeker upload resume endpoint
-Router.post('/resume',
-    jobSeekerAuthController.protect, 
-    jobSeekerAuthController.restrictTo('job seeker'),
-    jobSeekerController.uploadJobseekerPhoto,
-    jobSeekerController.resizeJobseekerPhoto,
-    jobSeekerController.jobseekerResume
-);
-
-// get a jobseeker's resume(s)
-Router.get('/myResume', 
-    jobSeekerAuthController.protect, 
-    jobSeekerAuthController.restrictTo('job seeker'),
-    jobSeekerController.getMyResume
-);
 
 // update a jobseeker resume endpoint
 Router.patch('/update-resume/:resumeId',
     jobSeekerAuthController.protect, 
     jobSeekerAuthController.restrictTo('job seeker'),
-    jobSeekerController.uploadJobseekerPhoto,
-    jobSeekerController.resizeJobseekerPhoto,
+    // jobSeekerController.uploadJobseekerPhoto,
+    // jobSeekerController.resizeJobseekerPhoto,
     jobSeekerController.updateJobseekerResume
 );
 

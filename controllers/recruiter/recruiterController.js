@@ -1,5 +1,5 @@
-const multer = require('multer');
-const sharp = require('sharp');
+// const multer = require('multer');
+// const sharp = require('sharp');
 const fs = require('fs');
 const path = require('path');
 // const crypto = require('crypto');
@@ -13,82 +13,82 @@ const JobListing = require('../../models/jobListing/jobListingModel');
 const catchAsync = require('../../utils/catchAsync');
 // const factory = require('../handler/handlerFactory');
 
-const multerStorage = multer.memoryStorage();
+// const multerStorage = multer.memoryStorage();
 
-const multerFilter = (req, file, cb) => {
-    if (
-      file.mimetype.startsWith('image') ||
-      (file.mimetype === 'application/pdf' && ['employmentProof'].includes(file.fieldname))
-    ) {
-      cb(null, true);
-    } else {
-      cb(new AppError('Please upload only images or PDF files for selected fields', 400), false);
-    }
-};   
+// const multerFilter = (req, file, cb) => {
+//     if (
+//       file.mimetype.startsWith('image') ||
+//       (file.mimetype === 'application/pdf' && ['employmentProof'].includes(file.fieldname))
+//     ) {
+//       cb(null, true);
+//     } else {
+//       cb(new AppError('Please upload only images or PDF files for selected fields', 400), false);
+//     }
+// };   
 
-const upload = multer({
-  storage: multerStorage,
-  fileFilter: multerFilter,
-});
+// const upload = multer({
+//   storage: multerStorage,
+//   fileFilter: multerFilter,
+// });
 
-exports.uploadRecruiterPhoto = catchAsync(async (req, res, next) => {
-    upload.fields([
-        { name: 'profileImage', maxCount: 1 },
-        { name: 'companyLogo', maxCount: 1 },
-        { name: 'employmentProof', maxCount: 1 },
-    ])(req, res, (err) => {
-        if (err) {
-            if (err instanceof multer.MulterError) {
-                if (err.code === 'LIMIT_UNEXPECTED_FILE') {
-                    return next(new AppError('Too many files uploaded for one or more fields', 400));
-                }
-            }
-            return next(err);
-        }
-        next();
-    });
-});
+// exports.uploadRecruiterPhoto = catchAsync(async (req, res, next) => {
+//     upload.fields([
+//         { name: 'profileImage', maxCount: 1 },
+//         { name: 'companyLogo', maxCount: 1 },
+//         { name: 'employmentProof', maxCount: 1 },
+//     ])(req, res, (err) => {
+//         if (err) {
+//             if (err instanceof multer.MulterError) {
+//                 if (err.code === 'LIMIT_UNEXPECTED_FILE') {
+//                     return next(new AppError('Too many files uploaded for one or more fields', 400));
+//                 }
+//             }
+//             return next(err);
+//         }
+//         next();
+//     });
+// });
   
-exports.resizeRecruiterPhoto = (req, res, next) => {
-    if (!req.files) {
-        return next();
-    }
+// exports.resizeRecruiterPhoto = (req, res, next) => {
+//     if (!req.files) {
+//         return next();
+//     }
 
-    Object.values(req.files).forEach((filesArray) => {
-        filesArray.forEach((file) => {
-            const isPdf = file.mimetype === 'application/pdf';
+//     Object.values(req.files).forEach((filesArray) => {
+//         filesArray.forEach((file) => {
+//             const isPdf = file.mimetype === 'application/pdf';
 
-            if (!isPdf) {
-                const originalName = file.originalname.split('.')[0];
+//             if (!isPdf) {
+//                 const originalName = file.originalname.split('.')[0];
 
-                file.filename = `Recruiter-${originalName}-${req.user.id}-${Date.now()}.jpeg`;
+//                 file.filename = `Recruiter-${originalName}-${req.user.id}-${Date.now()}.jpeg`;
 
-                sharp(file.buffer)
-                    .resize(500, 500)
-                    .toFormat('jpeg')
-                    .jpeg({ quality: 90 })
-                    .toFile(`public/img/recruiter/image/${file.filename}`)
-                    .then(() => {
-                    })
-                    .catch((err) => {
-                    });
-            } else {
-                const originalName = file.originalname.split('.')[0];
-                const fileExtension = file.originalname.split('.').pop();
+//                 sharp(file.buffer)
+//                     .resize(500, 500)
+//                     .toFormat('jpeg')
+//                     .jpeg({ quality: 90 })
+//                     .toFile(`public/img/recruiter/image/${file.filename}`)
+//                     .then(() => {
+//                     })
+//                     .catch((err) => {
+//                     });
+//             } else {
+//                 const originalName = file.originalname.split('.')[0];
+//                 const fileExtension = file.originalname.split('.').pop();
 
-                file.filename = `${originalName}-${req.user.id}.${fileExtension}`;
+//                 file.filename = `${originalName}-${req.user.id}.${fileExtension}`;
 
-                fs.writeFile(`public/img/recruiter/pdf/${file.filename}`, file.buffer, (err) => {
-                    if (err) {
-                    } else {
-                    }
-                });
-            }
-        });
-    });
+//                 fs.writeFile(`public/img/recruiter/pdf/${file.filename}`, file.buffer, (err) => {
+//                     if (err) {
+//                     } else {
+//                     }
+//                 });
+//             }
+//         });
+//     });
 
-    next();
-};
+//     next();
+// };
 
 const filterObj = (obj, ...allowedFields) => {
   const newObj = {};
@@ -105,14 +105,16 @@ exports.recruiterPersonalDetail = catchAsync(async (req, res, next) => {
         'profileImage',
         'middleName',
         'location',
-        'linkedAccount',
+        'github',
+        'linkedin',
+        'portfolioSite',
     );
     
-    if (req.files && req.files.profileImage) {
-        filteredBody.profileImage = req.files.profileImage[0].filename;
-    } else {
-        return next(new AppError('Please upload a profile picture', 400));
-    }
+    // if (req.files && req.files.profileImage) {
+    //     filteredBody.profileImage = req.files.profileImage[0].filename;
+    // } else {
+    //     return next(new AppError('Please upload a profile picture', 400));
+    // }
 
     const newRecruiterPersonalDetail = await RecruiterPersonalDetail.create({
         ...filteredBody,
@@ -142,19 +144,19 @@ exports.recruiterCompanyDetail = catchAsync(async (req, res, next) => {
         'aboutUs',
     );
 
-    if (req.files.employmentProof) {
-        filteredBody.employmentProof = req.files.employmentProof[0].filename;
-    }
-        else {
-        return next(new AppError('Please upload a proof of your employment at the company', 400));
-    }
+    // if (req.files.employmentProof) {
+    //     filteredBody.employmentProof = req.files.employmentProof[0].filename;
+    // }
+    //     else {
+    //     return next(new AppError('Please upload a proof of your employment at the company', 400));
+    // }
 
-    if (req.files.companyLogo) {
-        filteredBody.companyLogo = req.files.companyLogo[0].filename;
-    }
-        else {
-        return next(new AppError('Please upload a company Logo', 400));
-    }
+    // if (req.files.companyLogo) {
+    //     filteredBody.companyLogo = req.files.companyLogo[0].filename;
+    // }
+    //     else {
+    //     return next(new AppError('Please upload a company Logo', 400));
+    // }
 
     const newRecruiterCompanyDetail = await CompanyDetail.create({
         ...filteredBody,
@@ -318,14 +320,16 @@ exports.updatePersonalDetail = catchAsync(async (req, res, next) => {
         'profileImage',
         'middleName',
         'location',
-        'linkedAccount',
+        'github',
+        'linkedin',
+        'portfolioSite',
     );
 
-    if (req.files && req.files.profileImage) {
-        filteredBody.profileImage = req.files.profileImage[0].filename;
-    } else {
-        console.log('No profile Image file uploaded');
-    }    
+    // if (req.files && req.files.profileImage) {
+    //     filteredBody.profileImage = req.files.profileImage[0].filename;
+    // } else {
+    //     console.log('No profile Image file uploaded');
+    // }    
 
     const updatedPersonalDetail = await RecruiterPersonalDetail.findOneAndUpdate(
         { _id: personalDetailId, user: userId },
@@ -490,19 +494,19 @@ exports.updateCompanyDetail = catchAsync(async (req, res, next) => {
         'aboutUs',
     );
 
-    if (req.files.employmentProof) {
-        filteredBody.employmentProof = req.files.employmentProof[0].filename;
-    }
-        else {
-        return next(new AppError('Please upload a proof of your employment at the company', 400));
-    }
+    // if (req.files.employmentProof) {
+    //     filteredBody.employmentProof = req.files.employmentProof[0].filename;
+    // }
+    //     else {
+    //     return next(new AppError('Please upload a proof of your employment at the company', 400));
+    // }
 
-    if (req.files.companyLogo) {
-        filteredBody.companyLogo = req.files.companyLogo[0].filename;
-    }
-        else {
-        return next(new AppError('Please upload a company Logo', 400));
-    }
+    // if (req.files.companyLogo) {
+    //     filteredBody.companyLogo = req.files.companyLogo[0].filename;
+    // }
+    //     else {
+    //     return next(new AppError('Please upload a company Logo', 400));
+    // }
 
     const updatedCompanyDetail = await CompanyDetail.findOneAndUpdate(
         { _id: companyDetailId, user: userId },
@@ -521,6 +525,38 @@ exports.updateCompanyDetail = catchAsync(async (req, res, next) => {
         status: 'success',
         data: {
             Company: updatedCompanyDetail,
+        },
+    });
+});
+
+// update recruiter credentials
+exports.updateRecruiterDetails = catchAsync(async (req, res, next) => {
+    const userId = req.user.id;
+
+    if(!userId) {
+        return next(new AppError('User not found', 404));
+    };
+
+    const filteredBody = filterObj(
+        req.body,
+        'firstName',
+        'lastName',
+        'phoneNumber',
+    );   
+
+    const updatedRecruiterDetail = await Recruiter.findOneAndUpdate(
+        { _id: userId },
+        filteredBody,
+        {
+            new: true,
+            runValidators: true
+        }
+    );
+
+    res.status(200).json({
+        status: 'success',
+        data: {
+            user: updatedRecruiterDetail,
         },
     });
 });

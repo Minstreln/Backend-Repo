@@ -92,7 +92,13 @@ exports.createApplication = catchAsync(async (req, res, next) => {
 
 // Get all applications
 exports.getAllApplications = catchAsync(async (req, res, next) => {
-    const applications = await applicationModel.find().populate('jobListing').populate('jobSeeker');
+    const userId = req.user.id;
+
+    if(!userId) {
+        return next(new AppError('User not found', 404));
+    }
+
+    const applications = await applicationModel.find({ jobSeeker: userId }).populate('jobListing').populate('jobSeeker');
 
     if (!applications) {
         return next(new AppError('No applications found', 404));
@@ -128,15 +134,24 @@ exports.getApplicationById = catchAsync(async (req, res, next) => {
 
 // Update application by ID
 exports.updateApplication = catchAsync(async (req, res, next) => {
-    const application = await applicationModel.findByIdAndUpdate(
-        req.params.id,
+    const userId = req.user.id;
+
+    if(!userId) {
+        return next(new AppError('User not found', 404));
+    }
+
+    const application = await applicationModel.findOneAndUpdate(
+        {
+            _id: req.params.id,
+            jobSeeker: userId
+        },
         req.body,
         {
             new: true,
             runValidators: true
         }
     );
-
+    
     if (!application) {
         return next(new AppError('Application not found', 404));
     }
