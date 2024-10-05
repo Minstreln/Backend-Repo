@@ -234,30 +234,24 @@ exports.jobseekerExperience = catchAsync(async (req, res, next) => {
 
 // jobseeker upload resume
 exports.jobseekerResume = catchAsync(async (req, res, next) => {
-    const filteredBody = filterObj(req.body, 'title', 'resumeNames');
+    const filteredBody = filterObj(req.body, 'title', 'resume');
 
-    const resumeNamesArray = Array.isArray(filteredBody.resumeNames) 
-        ? filteredBody.resumeNames 
-        : [filteredBody.resumeNames];
-
-    if (resumeNamesArray.length > 0) {
-        const resumeUploads = resumeNamesArray.map(async (resumeName) => {
-            return Resume.create({
-                resume: resumeName,
-                title: filteredBody.title || resumeName,
-                user: req.user.id,
-            });
-        });
-
-        const newJobseekerResumes = await Promise.all(resumeUploads);
-
-        res.status(200).json({
-            status: 'success',
-            data: {
-                resumeDetails: newJobseekerResumes,
-            },
-        });
+    if (!filteredBody.resume) {
+        return next(new AppError('Resume file is required.', 400));
     }
+
+    const newJobseekerResume = await Resume.create({
+        resume: filteredBody.resume,
+        title: filteredBody.title || filteredBody.resume,
+        user: req.user.id,
+    });
+
+    res.status(200).json({
+        status: 'success',
+        data: {
+            resumeDetails: newJobseekerResume,
+        },
+    });
 });
 
 // get jobseeker resume(s)
@@ -363,7 +357,7 @@ exports.updateJobseekerResume = catchAsync(async (req, res, next) => {
     const resumeId = req.params.resumeId;
     const userId = req.user.id;
 
-    const filteredBody = filterObj(req.body, 'resumeNames', 'title');
+    const filteredBody = filterObj(req.body, 'resume', 'title');
 
     const resume = await Resume.findOne({ _id: resumeId, user: userId });
 
@@ -371,37 +365,30 @@ exports.updateJobseekerResume = catchAsync(async (req, res, next) => {
         return next(new AppError('No resume found with that ID for this user.', 404));
     }
 
-    const resumeNamesArray = Array.isArray(filteredBody.resumeNames) 
-        ? filteredBody.resumeNames 
-        : [filteredBody.resumeNames];
+    const updatedResume = await Resume.findOneAndUpdate(
+        { _id: resumeId, user: userId },
+        {
+            resume: filteredBody.resume || resume.resume,
+            title: filteredBody.title || resume.title,
+        },
+        {
+            new: true,
+            runValidators: true,
+        }
+    );
 
-    const updates = resumeNamesArray.map(async (resumeName) => {
-        return Resume.findOneAndUpdate(
-            { _id: resumeId, user: userId },
-            {
-                resume: resumeName,
-                title: filteredBody.title || resume.title,
-            },
-            {
-                new: true,
-                runValidators: true,
-            }
-        );
-    });
-
-    const updatedResumes = await Promise.all(updates);
-
-    if (!updatedResumes || updatedResumes.length === 0) {
+    if (!updatedResume) {
         return next(new AppError('Failed to update the resume. Please try again.', 400));
     }
 
     res.status(200).json({
         status: 'success',
         data: {
-            resume: updatedResumes,
+            resume: updatedResume,
         },
     });
 });
+
 
 // delete jobseeker resume(s)
 exports.deleteJobseekerResume = catchAsync(async (req, res, next) => {
