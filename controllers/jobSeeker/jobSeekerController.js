@@ -452,7 +452,7 @@ exports.updateExperienceDetail = catchAsync(async (req, res, next) => {
     const userId = req.user.id;
     const experienceDetailId = req.params.experienceDetailId;
 
-    const experienceDetail = await Experience.findOne({ _id: experienceDetailId, user: userId });
+    let experienceDetail = await Experience.findOne({ _id: experienceDetailId, user: userId });
 
     if (!experienceDetail) {
         return next(new AppError('No experience detail found with that ID for this user.', 404));
