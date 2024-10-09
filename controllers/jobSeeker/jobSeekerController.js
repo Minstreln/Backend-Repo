@@ -107,6 +107,7 @@ exports.jobseekerPersonalDetail = catchAsync(async (req, res, next) => {
         'linkedin',
         'portfolioSite',
         'aboutMe',
+        'phoneNumber',
     );
     
     // if (req.files && req.files.profileImage) {
@@ -219,7 +220,8 @@ exports.jobseekerExperience = catchAsync(async (req, res, next) => {
         company: req.body.company,
         typeOfOrg: req.body.typeOfOrg,
         location: req.body.location,
-        duration: req.body.duration,
+        startDate: req.body.startDate,
+        endDate: req.body.endDate,
         currentWorkPlace: req.body.currentWorkPlace,
         user: userId
     });
@@ -529,6 +531,7 @@ exports.updatePersonalDetail = catchAsync(async (req, res, next) => {
         'linkedin',
         'portfolioSite',
         'aboutMe',
+        'phoneNumber',
     );
 
     // if (req.files && req.files.profileImage) {

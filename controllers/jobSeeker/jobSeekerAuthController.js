@@ -56,7 +56,6 @@ exports.jobSeekerSignup = catchAsync(async (req, res) => {
       lastName: req.body.lastName,
       email: req.body.email,
       terms: req.body.terms,
-      phoneNumber: req.body.phoneNumber,
       password: req.body.password,
       passwordConfirm: req.body.passwordConfirm,
       confirmationToken: confirmationToken,

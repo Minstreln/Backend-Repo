@@ -11,6 +11,9 @@ const personalDetailSchema = mongoose.Schema({
         required: [true, 'please enter your location'],
         maxLength: [100, 'Maximum of 100 words!'],
     },
+    phoneNumber: {
+        type: String,
+    },
     profileImage: {
         type: String,
         required: [true, 'please upload a profile picture'],

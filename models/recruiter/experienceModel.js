@@ -25,9 +25,13 @@ const experienceSchema = mongoose.Schema({
         required: [true, 'please enter your location'],
         maxLength: [100, 'Maximum of 100 words!'],
     },
-    duration: {
-        type: Number,
-        required: [true, 'Duration is required'],
+    startDate: {
+        type: Date,
+        required: [true, 'Please enter a valid start date'],
+    },
+    endDate: {
+        type: Date,
+        required: [true, 'Please enter a valid end date'],
     },
     currentWorkPlace: {
         type: Boolean,
