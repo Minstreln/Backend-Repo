@@ -31,7 +31,7 @@ const experienceSchema = mongoose.Schema({
     },
     endDate: {
         type: Date,
-        required: [true, 'Please enter a valid end date'],
+        // required: [true, 'Please enter a valid end date'],
     },
     currentWorkPlace: {
         type: Boolean,
