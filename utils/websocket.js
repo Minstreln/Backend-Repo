@@ -14,6 +14,7 @@ const setupWebSocket = (server) => {
 
         if (recruiterId) {
             recruiterConnections.set(recruiterId, ws);  // Store the connection with recruiter ID as key
+            console.log(`Recruiter ${recruiterId} connected.`);
         }
 
         ws.on('message', (message) => {
