@@ -7,44 +7,9 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 
-const uploadDir = 'uploads/resumes';
-if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir, { recursive: true });
-}
-
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, uploadDir); 
-    },
-    filename: (req, file, cb) => {
-        cb(null, `${file.fieldname}-${Date.now()}${path.extname(file.originalname)}`);
-    }
-});
-
-const fileFilter = (req, file, cb) => {
-    const filetypes = /pdf/;
-    const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
-    const mimetype = filetypes.test(file.mimetype);
-
-    if (mimetype && extname) {
-        return cb(null, true);
-    } else {
-        cb(new AppError('Only PDF files are allowed', 400), false);
-    }
-};
-
-const upload = multer({
-    storage,
-    fileFilter,
-    limits: { fileSize: 1024 * 1024 * 5 } 
-});
-
-exports.uploadResume = upload.single('resume');
-
-// Create a job application
 exports.createApplication = catchAsync(async (req, res, next) => {
-    // Validate input fields
     await body('jobListing').notEmpty().withMessage('Job listing is required').run(req);
+    await body('resume').notEmpty().withMessage('Resume ID or URL is required').run(req);
     await body('coverLetter').notEmpty().withMessage('Cover letter is required').run(req);
 
     const errors = validationResult(req);
@@ -52,23 +17,21 @@ exports.createApplication = catchAsync(async (req, res, next) => {
         return next(new AppError(errors.array().map(err => err.msg).join(', '), 400));
     }
 
-    // Check for uploaded file
-    if (!req.file) {
-        return next(new AppError('Please upload a PDF resume', 400));
+    const { jobListing, resume, coverLetter, experience, personalDetails } = req.body;
+
+    if (!resume || typeof resume !== 'string') {
+        return next(new AppError('Invalid resume ID or URL', 400));
     }
 
-    // Create application in the database
-    const { jobListing, experience, personalDetails, coverLetter } = req.body;
     const newApplication = await applicationModel.create({
         jobListing,
         jobSeeker: req.user._id,
         experience,
         personalDetails,
         coverLetter,
-        resume: req.file.path 
+        resume 
     });
 
-    // Populate fields and notify recruiter
     const populatedApplication = await applicationModel.findById(newApplication._id)
         .populate('jobListing')
         .populate('jobSeeker');
@@ -81,7 +44,6 @@ exports.createApplication = catchAsync(async (req, res, next) => {
         })
     );
 
-    // Send successful response
     res.status(201).json({
         status: 'success',
         data: {
