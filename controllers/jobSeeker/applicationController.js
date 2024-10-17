@@ -7,6 +7,41 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 
+const uploadDir = 'public/img/uploads/resumes';
+if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir, { recursive: true });
+}
+
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, uploadDir); 
+    },
+    filename: (req, file, cb) => {
+        cb(null, `${file.fieldname}-${Date.now()}${path.extname(file.originalname)}`);
+    }
+});
+
+const fileFilter = (req, file, cb) => {
+    const filetypes = /pdf/;
+    const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+    const mimetype = filetypes.test(file.mimetype);
+
+    if (mimetype && extname) {
+        return cb(null, true);
+    } else {
+        cb(new AppError('Only PDF files are allowed', 400), false);
+    }
+};
+
+const upload = multer({
+    storage,
+    fileFilter,
+    limits: { fileSize: 1024 * 1024 * 5 } 
+});
+
+exports.uploadResume = upload.single('resume');
+
+// Create a job application
 exports.createApplication = catchAsync(async (req, res, next) => {
     await body('jobListing').notEmpty().withMessage('Job listing is required').run(req);
     await body('resume').notEmpty().withMessage('Resume ID or URL is required').run(req);
@@ -54,7 +89,13 @@ exports.createApplication = catchAsync(async (req, res, next) => {
 
 // Get all applications
 exports.getAllApplications = catchAsync(async (req, res, next) => {
-    const applications = await applicationModel.find().populate('jobListing').populate('jobSeeker');
+    const userId = req.user.id;
+
+    if(!userId) {
+        return next(new AppError('User not found', 404));
+    }
+
+    const applications = await applicationModel.find({ jobSeeker: userId }).populate('jobListing').populate('jobSeeker');
 
     if (!applications) {
         return next(new AppError('No applications found', 404));
@@ -90,15 +131,24 @@ exports.getApplicationById = catchAsync(async (req, res, next) => {
 
 // Update application by ID
 exports.updateApplication = catchAsync(async (req, res, next) => {
-    const application = await applicationModel.findByIdAndUpdate(
-        req.params.id,
+    const userId = req.user.id;
+
+    if(!userId) {
+        return next(new AppError('User not found', 404));
+    }
+
+    const application = await applicationModel.findOneAndUpdate(
+        {
+            _id: req.params.id,
+            jobSeeker: userId
+        },
         req.body,
         {
             new: true,
             runValidators: true
         }
     );
-
+    
     if (!application) {
         return next(new AppError('Application not found', 404));
     }

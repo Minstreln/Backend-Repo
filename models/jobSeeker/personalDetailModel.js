@@ -11,6 +11,9 @@ const personalDetailSchema = mongoose.Schema({
         required: [true, 'please enter your location'],
         maxLength: [100, 'Maximum of 100 words!'],
     },
+    phoneNumber: {
+        type: String,
+    },
     aboutMe: {
         type: String,
         required: [true, 'please tell us more about you'],
@@ -21,7 +24,13 @@ const personalDetailSchema = mongoose.Schema({
         type: String,
         required: [true, 'please upload a profile picture'],
     },
-    linkedAccount: {
+    github: {
+        type: String,
+    },
+    linkedin: {
+        type: String,
+    },
+    portfolioSite: {
         type: String,
     },
     user: {

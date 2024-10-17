@@ -28,9 +28,6 @@ const recruiterSchema = mongoose.Schema({
         type: Boolean,
         required: [true, 'Please agree to the terms and conditions']
     },
-    phoneNumber: {
-        type: String,
-    },
     role: {
         type: String,
         default: 'recruiter',

@@ -50,8 +50,8 @@ Router.patch('/update-password',
 Router.post('/personal-detail',
     recruiterAuthController.protect, 
     recruiterAuthController.restrictTo('recruiter'), 
-    recruiterController.uploadRecruiterPhoto,
-    recruiterController.resizeRecruiterPhoto,
+    // recruiterController.uploadRecruiterPhoto,
+    // recruiterController.resizeRecruiterPhoto,
     recruiterController.recruiterPersonalDetail
 );
 
@@ -59,63 +59,22 @@ Router.post('/personal-detail',
 Router.post('/company-detail',
     recruiterAuthController.protect, 
     recruiterAuthController.restrictTo('recruiter'), 
-    recruiterController.uploadRecruiterPhoto,
-    recruiterController.resizeRecruiterPhoto,
+    // recruiterController.uploadRecruiterPhoto,
+    // recruiterController.resizeRecruiterPhoto,
     recruiterController.recruiterCompanyDetail
 );
 
-// jobseeker update experience detail endpoint
+// recruiter update experience detail endpoint
 Router.post('/experience',
     recruiterAuthController.protect, 
     recruiterAuthController.restrictTo('recruiter'),
     recruiterController.recruiterExperience
 );
 
-
-//////////////////////////// profile CRUD routes /////////////////////////
-
-// get company detail
-Router.get('/get-company-detail',    
+Router.patch('/update-details',
     recruiterAuthController.protect, 
     recruiterAuthController.restrictTo('recruiter'),
-    recruiterController.getCompanyDetails
-);
-
-// delete company detail
-Router.delete('/delete-company-detail/:companyDetailId',
-    recruiterAuthController.protect, 
-    recruiterAuthController.restrictTo('recruiter'),
-    recruiterController.deleteCompanyDetails
-);
-
-// update company detail
-Router.patch('/update-company-detail/:companyDetailId', 
-    recruiterAuthController.protect, 
-    recruiterAuthController.restrictTo('recruiter'),
-    recruiterController.uploadRecruiterPhoto,
-    recruiterController.resizeRecruiterPhoto,
-    recruiterController.updateCompanyDetail
-);
-
-// get experience detail
-Router.get('/get-experience-detail', 
-    recruiterAuthController.protect, 
-    recruiterAuthController.restrictTo('recruiter'),
-    recruiterController.getExperienceDetails
-);
-
-// delete experience detail
-Router.delete('/delete-experience-detail/:experienceDetailId', 
-    recruiterAuthController.protect, 
-    recruiterAuthController.restrictTo('recruiter'),
-    recruiterController.deleteExperienceDetails
-);
-
-// update experience detail
-Router.patch('/update-experience-detail/:experienceDetailId', 
-    recruiterAuthController.protect, 
-    recruiterAuthController.restrictTo('recruiter'),
-    recruiterController.updateExperienceDetail
+    recruiterController.updateRecruiterDetails
 );
 
 // get personal detail
@@ -125,20 +84,18 @@ Router.get('/get-personal-detail',
     recruiterController.getPersonalDetails
 );
 
-// delete personal detail
-Router.delete('/delete-personal-detail/:personalDetailId',
+// get company detail
+Router.get('/get-company-detail',    
     recruiterAuthController.protect, 
     recruiterAuthController.restrictTo('recruiter'),
-    recruiterController.deletePersonalDetails
+    recruiterController.getCompanyDetails
 );
 
-// update personal detail
-Router.patch('/update-personal-detail/:personalDetailId', 
+// get experience detail
+Router.get('/get-experience-detail', 
     recruiterAuthController.protect, 
     recruiterAuthController.restrictTo('recruiter'),
-    recruiterController.uploadRecruiterPhoto,
-    recruiterController.resizeRecruiterPhoto,
-    recruiterController.updatePersonalDetail
+    recruiterController.getExperienceDetails
 );
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -156,6 +113,55 @@ Router.get('/open-jobs',
     recruiterAuthController.restrictTo('recruiter'),
     recruiterController.getOpenJobs,
 );
+
+//////////////////////////// profile CRUD routes /////////////////////////
+
+// delete company detail
+Router.delete('/delete-company-detail/:companyDetailId',
+    recruiterAuthController.protect, 
+    recruiterAuthController.restrictTo('recruiter'),
+    recruiterController.deleteCompanyDetails
+);
+
+// update company detail
+Router.patch('/update-company-detail/:companyDetailId', 
+    recruiterAuthController.protect, 
+    recruiterAuthController.restrictTo('recruiter'),
+    // recruiterController.uploadRecruiterPhoto,
+    // recruiterController.resizeRecruiterPhoto,
+    recruiterController.updateCompanyDetail
+);
+
+// delete experience detail
+Router.delete('/delete-experience-detail/:experienceDetailId', 
+    recruiterAuthController.protect, 
+    recruiterAuthController.restrictTo('recruiter'),
+    recruiterController.deleteExperienceDetails
+);
+
+// update experience detail
+Router.patch('/update-experience-detail/:experienceDetailId', 
+    recruiterAuthController.protect, 
+    recruiterAuthController.restrictTo('recruiter'),
+    recruiterController.updateExperienceDetail
+);
+
+// delete personal detail
+Router.delete('/delete-personal-detail/:personalDetailId',
+    recruiterAuthController.protect, 
+    recruiterAuthController.restrictTo('recruiter'),
+    recruiterController.deletePersonalDetails
+);
+
+// update personal detail
+Router.patch('/update-personal-detail/:personalDetailId', 
+    recruiterAuthController.protect, 
+    recruiterAuthController.restrictTo('recruiter'),
+    // recruiterController.uploadRecruiterPhoto,
+    // recruiterController.resizeRecruiterPhoto,
+    recruiterController.updatePersonalDetail
+);
+
 
 //////////////////////////////// GENERIC ROUTES ////////////////////////////////////////
 

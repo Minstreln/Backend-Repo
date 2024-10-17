@@ -1,5 +1,5 @@
-const multer = require('multer');
-const sharp = require('sharp');
+// const multer = require('multer');
+// const sharp = require('sharp');
 const fs = require('fs');
 const path = require('path');
 // const crypto = require('crypto');
@@ -13,80 +13,80 @@ const catchAsync = require('../../utils/catchAsync');
 const JobSeeker = require('../../models/jobSeeker/jobSeekerAuthModel');
 // const factory = require('../handler/handlerFactory');
 
-const multerStorage = multer.memoryStorage();
+// const multerStorage = multer.memoryStorage();
 
-const multerFilter = (req, file, cb) => {
-    if (
-      file.mimetype.startsWith('image') ||
-      (file.mimetype === 'application/pdf' && ['certificate', 'resume'].includes(file.fieldname))
-    ) {
-      cb(null, true);
-    } else {
-      cb(new AppError('Please upload only images or PDF files for selected fields', 400), false);
-    }
-};   
+// const multerFilter = (req, file, cb) => {
+//     if (
+//       file.mimetype.startsWith('image') ||
+//       (file.mimetype === 'application/pdf' && ['certificate', 'resume'].includes(file.fieldname))
+//     ) {
+//       cb(null, true);
+//     } else {
+//       cb(new AppError('Please upload only images or PDF files for selected fields', 400), false);
+//     }
+// };   
 
-const upload = multer({
-  storage: multerStorage,
-  fileFilter: multerFilter,
-});
+// const upload = multer({
+//   storage: multerStorage,
+//   fileFilter: multerFilter,
+// });
 
-exports.uploadJobseekerPhoto = catchAsync(async (req, res, next) => {
-    upload.fields([
-        { name: 'profileImage', maxCount: 1 },
-        { name: 'certificate', maxCount: 1 },
-        { name: 'resume', maxCount: 5 }
-    ])(req, res, (err) => {
-        if (err) {
-            if (err instanceof multer.MulterError) {
-                if (err.code === 'LIMIT_UNEXPECTED_FILE') {
-                    return next(new AppError('Too many files uploaded for one or more fields', 400));
-                }
-            }
-            return next(err);
-        }
-        next();
-    });
-});
+// exports.uploadJobseekerPhoto = catchAsync(async (req, res, next) => {
+//     upload.fields([
+//         { name: 'profileImage', maxCount: 1 },
+//         { name: 'certificate', maxCount: 1 },
+//         { name: 'resume', maxCount: 5 }
+//     ])(req, res, (err) => {
+//         if (err) {
+//             if (err instanceof multer.MulterError) {
+//                 if (err.code === 'LIMIT_UNEXPECTED_FILE') {
+//                     return next(new AppError('Too many files uploaded for one or more fields', 400));
+//                 }
+//             }
+//             return next(err);
+//         }
+//         next();
+//     });
+// });
   
-exports.resizeJobseekerPhoto = (req, res, next) => {
-    if (!req.files) {
-        return next();
-    }
+// exports.resizeJobseekerPhoto = (req, res, next) => {
+//     if (!req.files) {
+//         return next();
+//     }
 
-    Object.values(req.files).forEach((filesArray) => {
-        filesArray.forEach((file) => {
-            const isPdf = file.mimetype === 'application/pdf';
+//     Object.values(req.files).forEach((filesArray) => {
+//         filesArray.forEach((file) => {
+//             const isPdf = file.mimetype === 'application/pdf';
 
-            if (!isPdf) {
-                file.filename = `Jobseeker-${req.user.id}-${Date.now()}.jpeg`;
+//             if (!isPdf) {
+//                 file.filename = `Jobseeker-${req.user.id}-${Date.now()}.jpeg`;
 
-                sharp(file.buffer)
-                    .resize(500, 500)
-                    .toFormat('jpeg')
-                    .jpeg({ quality: 90 })
-                    .toFile(`public/img/jobseeker/image/${file.filename}`)
-                    .then(() => {
-                    })
-                    .catch((err) => {
-                    });
-            } else {
-                const originalName = file.originalname.split('.')[0];
-                const fileExtension = file.originalname.split('.').pop();
+//                 sharp(file.buffer)
+//                     .resize(500, 500)
+//                     .toFormat('jpeg')
+//                     .jpeg({ quality: 90 })
+//                     .toFile(`public/img/jobseeker/image/${file.filename}`)
+//                     .then(() => {
+//                     })
+//                     .catch((err) => {
+//                     });
+//             } else {
+//                 const originalName = file.originalname.split('.')[0];
+//                 const fileExtension = file.originalname.split('.').pop();
 
-                file.filename = `${originalName}-${req.user.id}-${Date.now()}.${fileExtension}`;
+//                 file.filename = `${originalName}-${req.user.id}-${Date.now()}.${fileExtension}`;
 
-                fs.writeFile(`public/img/jobseeker/pdf/${file.filename}`, file.buffer, (err) => {
-                    if (err) {
-                    } else {
-                    }
-                });
-            }
-        });
-    });
+//                 fs.writeFile(`public/img/jobseeker/pdf/${file.filename}`, file.buffer, (err) => {
+//                     if (err) {
+//                     } else {
+//                     }
+//                 });
+//             }
+//         });
+//     });
 
-    next();
-};
+//     next();
+// };
 
 const filterObj = (obj, ...allowedFields) => {
   const newObj = {};
@@ -103,15 +103,18 @@ exports.jobseekerPersonalDetail = catchAsync(async (req, res, next) => {
         'profileImage',
         'middleName',
         'location',
-        'linkedAccount',
+        'github',
+        'linkedin',
+        'portfolioSite',
         'aboutMe',
+        'phoneNumber',
     );
     
-    if (req.files && req.files.profileImage) {
-        filteredBody.profileImage = req.files.profileImage[0].filename;
-    } else {
-        return next(new AppError('Please upload a profile picture', 400));
-    }
+    // if (req.files && req.files.profileImage) {
+    //     filteredBody.profileImage = req.files.profileImage[0].filename;
+    // } else {
+    //     return next(new AppError('Please upload a profile picture', 400));
+    // }
 
     const newJobseekerPersonalDetail = await PersonalDetail.create({
         ...filteredBody,
@@ -187,12 +190,12 @@ exports.jobseekerAcademicDetail = catchAsync(async (req, res, next) => {
         'course',
     );
     
-    if (req.files.certificate) {
-        filteredBody.certificate = req.files.certificate[0].filename;
-    }
-        else {
-        return next(new AppError('Please upload certificate', 400));
-    }
+    // if (req.files.certificate) {
+    //     filteredBody.certificate = req.files.certificate[0].filename;
+    // }
+    //     else {
+    //     return next(new AppError('Please upload certificate', 400));
+    // }
 
     const newJobseekerAcademicDetail = await AcademicDetail.create({
         ...filteredBody,
@@ -217,7 +220,8 @@ exports.jobseekerExperience = catchAsync(async (req, res, next) => {
         company: req.body.company,
         typeOfOrg: req.body.typeOfOrg,
         location: req.body.location,
-        duration: req.body.duration,
+        startDate: req.body.startDate,
+        endDate: req.body.endDate,
         currentWorkPlace: req.body.currentWorkPlace,
         user: userId
     });
@@ -232,26 +236,24 @@ exports.jobseekerExperience = catchAsync(async (req, res, next) => {
 
 // jobseeker upload resume
 exports.jobseekerResume = catchAsync(async (req, res, next) => {
-    const filteredBody = filterObj(req.body, 'title');
-    
-    if (req.files.resume) {
-        const resumeUploads = req.files.resume.map(async (file) => {
-            return Resume.create({
-                resume: file.filename,
-                title: filteredBody.title || file.originalname,
-                user: req.user.id,
-            });
-        });
+    const filteredBody = filterObj(req.body, 'title', 'resume');
 
-        const newJobseekerResumes = await Promise.all(resumeUploads);
+    if (!filteredBody.resume) {
+        return next(new AppError('Resume file is required.', 400));
+    }
 
-        res.status(200).json({
-            status: 'success',
-            data: {
-                resumeDetails: newJobseekerResumes,
-            },
-        });
-    } 
+    const newJobseekerResume = await Resume.create({
+        resume: filteredBody.resume,
+        title: filteredBody.title || filteredBody.resume,
+        user: req.user.id,
+    });
+
+    res.status(200).json({
+        status: 'success',
+        data: {
+            resumeDetails: newJobseekerResume,
+        },
+    });
 });
 
 // get jobseeker resume(s)
@@ -325,11 +327,11 @@ exports.updateAcademicDetail = catchAsync(async (req, res, next) => {
         'course'
     );
 
-    if (req.files && req.files.certificate) {
-        filteredBody.certificate = req.files.certificate[0].filename;
-    } else {
-        console.log('No certificate file uploaded');
-    }    
+    // if (req.files && req.files.certificate) {
+    //     filteredBody.certificate = req.files.certificate[0].filename;
+    // } else {
+    //     console.log('No certificate file uploaded');
+    // }    
 
     const updatedAcademicDetail = await AcademicDetail.findOneAndUpdate(
         { _id: academicDetailId, user: userId },
@@ -357,7 +359,7 @@ exports.updateJobseekerResume = catchAsync(async (req, res, next) => {
     const resumeId = req.params.resumeId;
     const userId = req.user.id;
 
-    const filteredBody = filterObj(req.body, 'title');
+    const filteredBody = filterObj(req.body, 'resume', 'title');
 
     const resume = await Resume.findOne({ _id: resumeId, user: userId });
 
@@ -365,24 +367,12 @@ exports.updateJobseekerResume = catchAsync(async (req, res, next) => {
         return next(new AppError('No resume found with that ID for this user.', 404));
     }
 
-    if (req.files && req.files.resume) {
-        const newResumeFilename = req.files.resume[0].filename;
-
-        filteredBody.resume = newResumeFilename;
-
-        const oldResumePath = path.join(__dirname, '../../public/img/jobseeker/pdf/', resume.resume);
-        fs.unlink(oldResumePath, (err) => {
-            if (err) {
-                console.error('Error deleting old resume file:', err);
-            } else {
-                console.log('Old resume file deleted successfully.');
-            }
-        });
-    }
-
     const updatedResume = await Resume.findOneAndUpdate(
         { _id: resumeId, user: userId },
-        filteredBody,
+        {
+            resume: filteredBody.resume || resume.resume,
+            title: filteredBody.title || resume.title,
+        },
         {
             new: true,
             runValidators: true,
@@ -400,6 +390,7 @@ exports.updateJobseekerResume = catchAsync(async (req, res, next) => {
         },
     });
 });
+
 
 // delete jobseeker resume(s)
 exports.deleteJobseekerResume = catchAsync(async (req, res, next) => {
@@ -490,10 +481,12 @@ exports.updateExperienceDetail = catchAsync(async (req, res, next) => {
 exports.getPersonalDetails = catchAsync(async (req, res, next) => {
     const userId = req.user.id;
 
-    const personalDetails = await PersonalDetail.find({ user: userId });
+    const personalDetails = await PersonalDetail.findOne({ user: userId }).populate(
+        'user'
+    );
 
     if (!personalDetails) {
-        return next(new AppError, 'No personal details found for this user.' );
+        return next(new AppError('No personal details found for this user.'));
     };
 
     res.status(200).json({
@@ -513,7 +506,7 @@ exports.deletePersonalDetails = catchAsync(async (req, res, next) => {
     const personalDetail = await PersonalDetail.findOne({ _id: personalDetailId, user: userId });
 
     if (!personalDetail) {
-        return next(new AppError, 'No personal details found for this user.' );
+        return next(new AppError('No personal details found for this user.'));
     };
 
     await personalDetail.remove();
@@ -534,15 +527,18 @@ exports.updatePersonalDetail = catchAsync(async (req, res, next) => {
         'profileImage',
         'middleName',
         'location',
-        'linkedAccount',
+        'github',
+        'linkedin',
+        'portfolioSite',
         'aboutMe',
+        'phoneNumber',
     );
 
-    if (req.files && req.files.profileImage) {
-        filteredBody.profileImage = req.files.profileImage[0].filename;
-    } else {
-        console.log('No profile Image file uploaded');
-    }    
+    // if (req.files && req.files.profileImage) {
+    //     filteredBody.profileImage = req.files.profileImage[0].filename;
+    // } else {
+    //     console.log('No profile Image file uploaded');
+    // }    
 
     const updatedPersonalDetail = await PersonalDetail.findOneAndUpdate(
         { _id: personalDetailId, user: userId },
@@ -561,6 +557,39 @@ exports.updatePersonalDetail = catchAsync(async (req, res, next) => {
         status: 'success',
         data: {
             Personal: updatedPersonalDetail,
+        },
+    });
+});
+
+
+// update jobseeker credentials
+exports.updateJobseekerDetails = catchAsync(async (req, res, next) => {
+    const userId = req.user.id;
+
+    if(!userId) {
+        return next(new AppError('User not found', 404));
+    };
+
+    const filteredBody = filterObj(
+        req.body,
+        'firstName',
+        'lastName',
+        'phoneNumber',
+    );   
+
+    const updatedJobseekerDetail = await JobSeeker.findOneAndUpdate(
+        { _id: userId },
+        filteredBody,
+        {
+            new: true,
+            runValidators: true
+        }
+    );
+
+    res.status(200).json({
+        status: 'success',
+        data: {
+            user: updatedJobseekerDetail,
         },
     });
 });
