@@ -50,6 +50,11 @@ Router.get('/all-recruiters',
     adminController.getAllRecruiter
 );
 
+// delete cloudinary file
+Router.post('/delete-cloudinary-file', 
+  adminController.deleteCloudinaryFile,
+);
+
 //////////////////////////////// GENERIC ROUTES ////////////////////////////////
 
 // admin reset password endpoint

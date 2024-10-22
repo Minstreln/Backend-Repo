@@ -1,6 +1,8 @@
 const multer = require('multer');
 const sharp = require('sharp');
 const fs = require('fs');
+const crypto = require('crypto');
+const axios = require('axios');
 const path = require('path');
 const moment = require('moment');
 const cron = require('node-cron');
@@ -280,6 +282,41 @@ exports.getRecruiter = factory.getOne(Recruiter);
 
 // delete recruiters logic
 exports.deleteRecruiter = factory.deleteOne(Recruiter);
+
+// delete cloudinary file
+exports.deleteCloudinaryFile = catchAsync(async (req, res, next) => {
+  const { publicId, resourceType, cloudinaryConfig } = req.body;
+
+  // Prepare parameters for the delete request
+  const timestamp = Math.round(new Date().getTime() / 1000).toString();
+  const paramsToSign = `public_id=${publicId}&resource_type=${resourceType}&timestamp=${timestamp}${cloudinaryConfig.apiSecret}`;
+  const signature = crypto
+    .createHash("sha1")
+    .update(paramsToSign)
+    .digest("hex");
+
+  // Prepare the delete request payload
+  const deleteParams = new URLSearchParams({
+    public_id: publicId,
+    resource_type: resourceType,
+    signature: signature,
+    api_key: cloudinaryConfig.apiKey,
+    timestamp: timestamp,
+  });
+
+  try {
+    // Send the delete request to Cloudinary
+    const response = await axios.post(
+      `https://api.cloudinary.com/v1_1/${cloudinaryConfig.cloudName}/${resourceType}/destroy`,
+      deleteParams
+    );
+
+    res.json(response.data);
+  } catch (error) {
+    console.error("Error deleting file from Cloudinary:", error);
+    res.status(500).json({ error: "Failed to delete file from Cloudinary" });
+  }
+});
 
 ///////////////////////////////// CRON JOB /////////////////////////////////////////
 
